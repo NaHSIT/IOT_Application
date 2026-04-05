@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>机房监控系统 - 登录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            overflow: hidden;
+        }
+        .optical-center {
+            transform: translateY(-5%);
+        }
+        .input-focus-effect:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50/50">
+    
+    <div class="w-full max-w-[22rem] z-10 optical-center">
+        <!-- Logo Section -->
+        <div class="flex flex-col items-center mb-12">
+            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 mb-6">
+                <div class="flex flex-col space-y-2 w-8">
+                    <div class="h-2.5 bg-white/90 rounded-sm flex items-center px-1.5 space-x-1">
+                        <div class="w-1 h-1 bg-blue-600 rounded-full"></div>
+                    </div>
+                    <div class="h-2.5 bg-white/90 rounded-sm flex items-center px-1.5 space-x-1">
+                        <div class="w-1 h-1 bg-blue-600 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">机房监控系统</h1>
+        </div>
+
+        <!-- Form Section -->
+        <form id="loginForm" class="space-y-5">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <i class="fas fa-user text-sm"></i>
+                </div>
+                <input type="text" id="username" name="username" placeholder="请输入账号" 
+                    class="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-[15px] placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all outline-none">
+            </div>
+
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <i class="fas fa-lock text-sm"></i>
+                </div>
+                <input type="password" id="password" name="password" placeholder="请输入密码" 
+                    class="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-[15px] placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all outline-none">
+            </div>
+
+            <div class="flex items-center px-0.5">
+                <label class="flex items-center cursor-pointer group select-none">
+                    <input type="checkbox" id="autoLogin" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600/20 cursor-pointer">
+                    <span class="ml-2.5 text-[13px] text-slate-500 group-hover:text-slate-700 transition-colors">自动登录</span>
+                </label>
+            </div>
+
+            <button type="submit" 
+                class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-semibold text-base rounded-xl shadow-md shadow-blue-200 transition-all mt-2">
+                进入系统
+            </button>
+        </form>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="absolute bottom-10 text-slate-400 text-[12px] font-medium tracking-wide">
+        © 2026 分布式机房监控系统
+    </div>
+
+    <script>
+        // 7天免登录检查
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastLogin = localStorage.getItem('lastLoginTime');
+            if (lastLogin) {
+                const now = Date.now();
+                const sevenDays = 7 * 24 * 60 * 60 * 1000;
+                if (now - parseInt(lastLogin) < sevenDays) {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const autoLogin = document.getElementById('autoLogin').checked;
+            
+            if (username === 'NaHS' && password === '12345678') {
+                if (autoLogin) {
+                    localStorage.setItem('lastLoginTime', Date.now());
+                } else {
+                    localStorage.removeItem('lastLoginTime');
+                }
+                window.location.href = 'index.html';
+            } else {
+                alert('账号或密码错误！');
+            }
+        });
+    </script>
+</body>
+</html>

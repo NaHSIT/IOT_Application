@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>机房监控系统 - 环境监测</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/config.js"></script>
+    <script src="js/onenet.js"></script>
+    <style>
+        body { background-color: #f4f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .card { background-color: white; border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .h-safe { height: env(safe-area-inset-bottom, 20px); }
+    </style>
+</head>
+<body class="pb-[6.5rem]">
+    <!-- Header -->
+    <header class="bg-white px-5 pt-[3.25rem] pb-5 flex items-center justify-between border-b border-gray-100 z-10 relative">
+        <a href="index.html" class="text-gray-400 w-8 h-8 flex items-center justify-center -ml-2 active:bg-gray-100 rounded-full transition">
+            <i class="fas fa-chevron-left text-[1.1rem]"></i>
+        </a>
+        <h1 class="text-[1.2rem] font-bold text-gray-900 tracking-tight">实时环境监测</h1>
+        <div class="flex items-center space-x-1.5 text-blue-500 cursor-pointer active:opacity-50 transition" id="refreshBtn">
+            <span class="text-[13px] font-bold tracking-wide">刷新</span>
+            <i class="fas fa-cog text-sm" id="refreshIcon"></i>
+        </div>
+    </header>
+
+    <main class="px-5 py-5 space-y-[1.1rem]">
+        <!-- Dynamic Sensors -->
+        <div id="sensorCardsContainer" class="space-y-[1.1rem]"></div>
+
+        <!-- Trend Chart -->
+        <div class="card p-5 border border-gray-50">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-gray-900 tracking-tight text-[15px]">近30分钟变化趋势</h3>
+                <a href="history.html" id="historyLink" class="text-[12px] font-bold text-blue-500 flex items-center active:opacity-70 transition">
+                    历史详情 <i class="fas fa-chevron-right ml-1 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Segmented Control Tabs -->
+            <div id="chartTabsContainer" class="flex bg-gray-100/80 p-1 rounded-xl border border-gray-200/50 mb-6 overflow-x-auto custom-scrollbar"></div>
+            
+            <div id="trendChartWrap" class="h-56 w-full relative transition-opacity duration-300 cursor-pointer" onclick="document.getElementById('historyLink').click()">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+        <a href="index.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">首页</span>
+        </a>
+        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-blue-500">
+            <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">监测</span>
+        </a>
+        <a href="control.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">控制</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="far fa-user text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">我的</span>
+        </a>
+        <div class="h-safe w-full absolute bottom-0"></div>
+    </nav>
+
+    <script>
+        const currentModel = getDataModel();
+        const sensors = currentModel.sensors;
+        
+        // Hex colors for charts based on Tailwind colors
+        const CHART_COLORS = {
+            'orange': '#f97316', 'blue': '#3b82f6', 'slate': '#64748b', 'cyan': '#06b6d4',
+            'teal': '#14b8a6', 'yellow': '#eab308', 'red': '#ef4444', 'green': '#22c55e',
+            'purple': '#a855f7', 'pink': '#ec4899'
+        };
+        const CHART_BG_COLORS = {
+            'orange': 'rgba(249, 115, 22, 0.25)', 'blue': 'rgba(59, 130, 246, 0.25)',
+            'slate': 'rgba(100, 116, 139, 0.25)', 'cyan': 'rgba(6, 182, 212, 0.25)',
+            'teal': 'rgba(20, 184, 166, 0.25)', 'yellow': 'rgba(234, 179, 8, 0.25)',
+            'red': 'rgba(239, 68, 68, 0.25)', 'green': 'rgba(34, 197, 94, 0.25)',
+            'purple': 'rgba(168, 85, 247, 0.25)', 'pink': 'rgba(236, 72, 153, 0.25)'
+        };
+
+        let currentMetric = sensors.length > 0 ? sensors[0].id : null;
+        let trendChart = null;
+
+        // Initialize UI
+        function initUI() {
+            const container = document.getElementById('sensorCardsContainer');
+            const tabsContainer = document.getElementById('chartTabsContainer');
+            
+            sensors.forEach((s, index) => {
+                const colors = COLOR_CLASSES[s.color] || COLOR_CLASSES['slate'];
+                
+                // Card
+                container.innerHTML += `
+                    <a href="history.html?metric=${s.id}" class="card p-6 relative overflow-hidden flex justify-between items-center border border-gray-50 block active:scale-[0.98] transition cursor-pointer">
+                        <div>
+                            <div class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">${s.name}</div>
+                            <div class="flex items-baseline">
+                                <span id="val-${s.id}" class="text-[1.5rem] font-bold text-gray-800 tracking-tight">--</span>
+                                <span class="text-[10px] font-bold text-gray-400 ml-1">${s.unit}</span>
+                            </div>
+                            <div id="status-${s.id}" class="flex items-center mt-2 bg-gray-50/50 w-max px-2 py-1 rounded-md border border-gray-100/50">
+                                <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
+                                <span class="text-gray-500 text-[10px] font-bold tracking-wide">等待数据 (范围 ${s.min}-${s.max}${s.unit})</span>
+                            </div>
+                        </div>
+                        <div class="w-[3.5rem] h-[3.5rem] ${colors.bg} rounded-[1.2rem] flex items-center justify-center ${colors.text} z-10">
+                            <i class="fas ${s.icon} text-[1.8rem]"></i>
+                        </div>
+                        <div class="absolute right-4 top-4 text-gray-300">
+                            <i class="fas fa-chevron-right text-xs"></i>
+                        </div>
+                    </a>
+                `;
+
+                // Tab
+                const isSelected = index === 0;
+                tabsContainer.innerHTML += `
+                    <button type="button" data-metric="${s.id}" class="metric-tab flex-1 py-2 px-3 text-[12px] font-bold rounded-lg transition-all whitespace-nowrap ${isSelected ? 'bg-white text-blue-600 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'text-gray-500 hover:text-gray-700'}">
+                        ${s.name}
+                    </button>
+                `;
+            });
+
+            // Tab Event Listeners
+            document.querySelectorAll('.metric-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    setMetric(this.dataset.metric);
+                });
+            });
+
+            document.getElementById('historyLink').href = `history.html?metric=${currentMetric}`;
+        }
+
+        initUI();
+
+        // 页面加载时尝试读取本地缓存
+        const cachedData = localStorage.getItem('iot_latest_data');
+        if (cachedData) {
+            try { updateCards(JSON.parse(cachedData)); } 
+            catch (e) { console.error(e); }
+        }
+
+        // 同步 OneNet 数据
+        async function syncData(isManual = false) {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (isManual && refreshIcon) refreshIcon.classList.add('fa-spin');
+            
+            try {
+                if (typeof OneNetService !== 'undefined') {
+                    const data = await OneNetService.getLatestData();
+                    if (data) {
+                        updateCards(data);
+                        updateChartRealtime(data);
+                    }
+                }
+            } catch (error) {
+                console.error('Sync failed:', error);
+            } finally {
+                if (isManual && refreshIcon) {
+                    setTimeout(() => refreshIcon.classList.remove('fa-spin'), 500);
+                }
+            }
+        }
+        
+        document.getElementById('refreshBtn').addEventListener('click', () => syncData(true));
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                const newModelStr = localStorage.getItem('iot_data_model');
+                if (newModelStr && JSON.stringify(currentModel) !== newModelStr) {
+                    window.location.reload(); // Simplest way to cleanly rebuild the charts and tabs
+                }
+            }
+        });
+
+        function updateCards(data) {
+            sensors.forEach(s => {
+                if (data[s.id] !== undefined) {
+                    const decimals = typeof getDecimals === 'function' ? getDecimals(s.dataType, s.step) : 1;
+                    const val = Number(data[s.id]).toFixed(decimals);
+                    document.getElementById(`val-${s.id}`).innerText = val;
+                    
+                    const statusEl = document.getElementById(`status-${s.id}`);
+                    const numericVal = Number(val);
+                    if (numericVal > s.max || numericVal < s.min) {
+                        statusEl.innerHTML = `<span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2 shadow-[0_0_6px_rgba(239,68,68,0.6)]"></span><span class="text-red-600 text-[10px] font-bold tracking-wide">状态异常 (${numericVal > s.max ? '偏高' : '偏低'})</span>`;
+                        statusEl.className = 'flex items-center mt-2 bg-red-50/50 w-max px-2 py-1 rounded-md border border-red-100/50';
+                    } else {
+                        statusEl.innerHTML = `<span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span><span class="text-green-600 text-[10px] font-bold tracking-wide">状态正常 (${s.min}-${s.max}${s.unit})</span>`;
+                        statusEl.className = 'flex items-center mt-2 bg-green-50/50 w-max px-2 py-1 rounded-md border border-green-100/50';
+                    }
+                }
+            });
+        }
+
+        // --- Chart Logic ---
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        function createGradient(colorStr) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+            gradient.addColorStop(0, colorStr);
+            gradient.addColorStop(1, 'rgba(255,255,255,0)');
+            return gradient;
+        }
+
+        let historyData = JSON.parse(localStorage.getItem('iot_history_data') || '[]');
+        const displayData = historyData.slice(-7);
+        const labels = displayData.map(item => item.time);
+        
+        if (labels.length === 0) {
+            const now = new Date();
+            labels.push(`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`);
+        }
+
+        // Precompute chart configs for all sensors
+        const metricConfig = {};
+        sensors.forEach(s => {
+            let dataArr = displayData.map(item => item.data[s.id] !== undefined ? item.data[s.id] : null);
+            if (dataArr.length === 0) dataArr.push(null);
+            
+            const range = s.max - s.min;
+            const buffer = range * 0.2;
+            
+            metricConfig[s.id] = {
+                label: s.name,
+                data: dataArr,
+                borderColor: CHART_COLORS[s.color] || CHART_COLORS['slate'],
+                gradientTop: CHART_BG_COLORS[s.color] || CHART_BG_COLORS['slate'],
+                min: Math.max(0, s.min - buffer),
+                max: s.max + buffer,
+                stepSize: Math.ceil(range / 5) || 1
+            };
+        });
+
+        if (currentMetric && metricConfig[currentMetric]) {
+            const initialConfig = metricConfig[currentMetric];
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: initialConfig.label,
+                        data: initialConfig.data,
+                        borderColor: initialConfig.borderColor,
+                        backgroundColor: createGradient(initialConfig.gradientTop),
+                        fill: true,
+                        tension: 0.45,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderWidth: 2.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 450, easing: 'easeInOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(0,0,0,0.85)', titleFont: { size: 11 }, bodyFont: { size: 12, weight: 'bold' }, padding: 10, displayColors: false, cornerRadius: 8 }
+                    },
+                    scales: {
+                        y: {
+                            min: initialConfig.min,
+                            max: initialConfig.max,
+                            grid: { color: '#f1f5f9', drawBorder: false, tickLength: 0 },
+                            ticks: { font: { size: 10, weight: '600' }, color: '#cbd5e1', stepSize: initialConfig.stepSize, padding: 8 }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { font: { size: 10, weight: '600' }, color: '#cbd5e1', padding: 8 }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        }
+
+        function setMetric(metricKey) {
+            if (currentMetric === metricKey || !trendChart || !metricConfig[metricKey]) return;
+            currentMetric = metricKey;
+            
+            document.getElementById('historyLink').href = `history.html?metric=${currentMetric}`;
+            
+            const trendChartWrap = document.getElementById('trendChartWrap');
+            trendChartWrap.classList.add('opacity-70');
+
+            const selected = metricConfig[metricKey];
+            trendChart.data.datasets[0].label = selected.label;
+            trendChart.data.datasets[0].data = selected.data;
+            trendChart.data.datasets[0].borderColor = selected.borderColor;
+            trendChart.data.datasets[0].backgroundColor = createGradient(selected.gradientTop);
+            trendChart.options.scales.y.min = selected.min;
+            trendChart.options.scales.y.max = selected.max;
+            trendChart.options.scales.y.ticks.stepSize = selected.stepSize;
+            trendChart.update();
+
+            setTimeout(() => trendChartWrap.classList.remove('opacity-70'), 280);
+
+            document.querySelectorAll('.metric-tab').forEach(tab => {
+                if (tab.dataset.metric === metricKey) {
+                    tab.classList.add('bg-white', 'text-blue-600', 'shadow-[0_2px_8px_rgba(0,0,0,0.04)]');
+                    tab.classList.remove('text-gray-500', 'hover:text-gray-700');
+                } else {
+                    tab.classList.remove('bg-white', 'text-blue-600', 'shadow-[0_2px_8px_rgba(0,0,0,0.04)]');
+                    tab.classList.add('text-gray-500', 'hover:text-gray-700');
+                }
+            });
+        }
+
+        function updateChartRealtime(data) {
+            if (!trendChart || !currentMetric) return;
+            
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            const newValue = data[currentMetric];
+            if (newValue === undefined) return;
+
+            trendChart.data.labels.push(timeStr);
+            trendChart.data.datasets[0].data.push(newValue);
+            
+            // Also update the background config array so switching tabs preserves the new data point
+            metricConfig[currentMetric].data.push(newValue);
+            
+            if (trendChart.data.labels.length > 7) {
+                trendChart.data.labels.shift();
+                trendChart.data.datasets[0].data.shift();
+                metricConfig[currentMetric].data.shift();
+            }
+            
+            trendChart.update('none');
+        }
+
+        setTimeout(syncData, 500);
+        setInterval(syncData, 10000);
+    </script>
+</body>
+</html>

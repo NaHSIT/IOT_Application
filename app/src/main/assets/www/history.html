@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>机房监控系统 - 历史查询</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/config.js"></script>
+    <script src="js/onenet.js"></script>
+    <style>
+        body { background-color: #f4f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .card { background-color: white; border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .h-safe { height: env(safe-area-inset-bottom, 20px); }
+    </style>
+</head>
+<body class="pb-[6.5rem]">
+    <!-- Header -->
+    <header class="bg-white px-5 pt-[3.25rem] pb-5 flex items-center justify-between border-b border-gray-100 z-10 relative">
+        <a href="javascript:history.back()" class="text-gray-400 w-8 h-8 flex items-center justify-center -ml-2 active:bg-gray-100 rounded-full transition">
+            <i class="fas fa-chevron-left text-[1.1rem]"></i>
+        </a>
+        <div class="flex flex-col items-center">
+            <h1 class="text-[1.2rem] font-bold text-gray-900 tracking-tight">历史数据查询</h1>
+            <span id="deviceStatus" class="text-[10px] font-bold text-gray-400 mt-0.5 flex items-center hidden">
+                <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1"></span> 设备离线
+            </span>
+        </div>
+        <div class="flex items-center space-x-1.5 text-blue-500 cursor-pointer active:opacity-70 transition" onclick="exportHistoryData()">
+            <i class="fas fa-file-export text-[13px]"></i>
+            <span class="text-[13px] font-bold tracking-wide">导出</span>
+        </div>
+    </header>
+
+    <main class="px-5 py-5 space-y-[1.1rem]">
+        <!-- Custom Toast -->
+        <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full text-[13px] font-bold shadow-lg z-[110] transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+            <!-- Toast message -->
+        </div>
+
+        <!-- Filter Tabs -->
+        <div id="filterTabsContainer" class="flex bg-gray-100/80 p-1 rounded-xl border border-gray-200/50 overflow-x-auto custom-scrollbar"></div>
+
+        <!-- Trend Chart -->
+        <div class="card p-5 border border-gray-50">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="chartTitle" class="font-bold text-gray-900 tracking-tight text-[15px]">变化曲线</h3>
+            </div>
+            
+            <div id="historyChartWrap" class="h-56 w-full relative transition-opacity duration-300">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card overflow-hidden border border-gray-50">
+            <div class="bg-gray-50/50 px-5 py-3.5 flex justify-between text-[11px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100/80">
+                <span>采样时间</span>
+                <span>数值</span>
+            </div>
+            <div id="dataTableBody" class="divide-y divide-gray-100/80 max-h-[40vh] overflow-y-auto custom-scrollbar">
+                <!-- Data will be populated here by JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+        <a href="index.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">首页</span>
+        </a>
+        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">监测</span>
+        </a>
+        <a href="control.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">控制</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="far fa-user text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">我的</span>
+        </a>
+        <div class="h-safe w-full absolute bottom-0"></div>
+    </nav>
+
+    <script>
+        const currentModel = getDataModel();
+        const sensors = currentModel.sensors;
+        
+        const CHART_COLORS = {
+            'orange': '#f97316', 'blue': '#3b82f6', 'slate': '#64748b', 'cyan': '#06b6d4',
+            'teal': '#14b8a6', 'yellow': '#eab308', 'red': '#ef4444', 'green': '#22c55e',
+            'purple': '#a855f7', 'pink': '#ec4899'
+        };
+        const CHART_BG_COLORS = {
+            'orange': 'rgba(249, 115, 22, 0.25)', 'blue': 'rgba(59, 130, 246, 0.25)',
+            'slate': 'rgba(100, 116, 139, 0.25)', 'cyan': 'rgba(6, 182, 212, 0.25)',
+            'teal': 'rgba(20, 184, 166, 0.25)', 'yellow': 'rgba(234, 179, 8, 0.25)',
+            'red': 'rgba(239, 68, 68, 0.25)', 'green': 'rgba(34, 197, 94, 0.25)',
+            'purple': 'rgba(168, 85, 247, 0.25)', 'pink': 'rgba(236, 72, 153, 0.25)'
+        };
+
+        const historyChartWrap = document.getElementById('historyChartWrap');
+        const chartTitle = document.getElementById('chartTitle');
+        const ctx = document.getElementById('historyChart').getContext('2d');
+
+        function createGradient(color) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, 'rgba(255,255,255,0)');
+            return gradient;
+        }
+
+        let historyChart;
+        let metricConfig = {};
+        let labels = [];
+        let fullTimes = [];
+        
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 2500);
+        }
+
+        function exportHistoryData() {
+            let historyData = JSON.parse(localStorage.getItem('iot_history_data') || '[]');
+            
+            // Filter for the last 24 hours to match the UI
+            const now = new Date();
+            const twentyFourHoursAgo = now.getTime() - (24 * 60 * 60 * 1000);
+            const displayData = historyData.filter(item => {
+                let itemTime = item.timestamp;
+                if (!itemTime && item.fullTime) {
+                    itemTime = new Date(item.fullTime.replace(/-/g, '/')).getTime();
+                }
+                return itemTime >= twentyFourHoursAgo;
+            });
+
+            if (displayData.length === 0) {
+                showToast('暂无历史数据可导出');
+                return;
+            }
+
+            try {
+                // Prepare CSV content with BOM for Excel compatibility
+                let csvContent = '\uFEFF'; 
+                
+                // Build Headers
+                const headers = ['记录时间', '完整时间'];
+                sensors.forEach(s => {
+                    const colName = `${s.name}(${s.unit})`.replace(/"/g, '""');
+                    headers.push(`"${colName}"`);
+                });
+                csvContent += headers.join(',') + '\n';
+
+                // Build Rows
+                displayData.forEach(item => {
+                    const row = [
+                        item.time || '',
+                        item.fullTime || ''
+                    ];
+                    sensors.forEach(s => {
+                        const val = item.data[s.id];
+                        let cell = val !== undefined && val !== null ? String(val) : '';
+                        if (cell.includes(',') || cell.includes('"') || cell.includes('\n')) {
+                            cell = '"' + cell.replace(/"/g, '""') + '"';
+                        }
+                        row.push(cell);
+                    });
+                    csvContent += row.join(',') + '\n';
+                });
+
+                const dateStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}`;
+                const fileName = `监控历史数据_${dateStr}.csv`;
+                
+                // 检测是否在 Android 原生 WebView 环境中，并注入了自定义 Javascript 接口
+                if (window.AndroidApp && window.AndroidApp.shareCSV) {
+                    window.AndroidApp.shareCSV(fileName, csvContent);
+                    showToast('请在弹出的面板中选择发送或保存');
+                } else {
+                    // Fallback: 普通浏览器环境下的下载处理
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', fileName);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showToast('导出成功');
+                }
+            } catch (err) {
+                console.error('Export error:', err);
+                showToast('导出失败，请检查系统权限');
+            }
+        }
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        let currentMetric = urlParams.get('metric') || (sensors.length > 0 ? sensors[0].id : null);
+
+        function initTabs() {
+            const container = document.getElementById('filterTabsContainer');
+            sensors.forEach((s, index) => {
+                const isSelected = s.id === currentMetric;
+                container.innerHTML += `
+                    <button type="button" data-metric="${s.id}" class="metric-tab flex-1 py-2 px-3 text-[12px] font-bold rounded-lg transition-all whitespace-nowrap ${isSelected ? 'bg-white text-blue-600 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'text-gray-500 hover:text-gray-700'}">
+                        <i class="fas ${s.icon} mr-1"></i> ${s.name}
+                    </button>
+                `;
+            });
+
+            document.querySelectorAll('.metric-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    setMetric(this.dataset.metric);
+                });
+            });
+        }
+
+        function loadData() {
+            let historyData = JSON.parse(localStorage.getItem('iot_history_data') || '[]');
+            
+            const now = new Date();
+            const twentyFourHoursAgo = now.getTime() - (24 * 60 * 60 * 1000);
+            
+            const displayData = historyData.filter(item => {
+                let itemTime = item.timestamp;
+                if (!itemTime && item.fullTime) {
+                    itemTime = new Date(item.fullTime.replace(/-/g, '/')).getTime();
+                }
+                return itemTime >= twentyFourHoursAgo;
+            });
+
+            labels = displayData.map(item => item.time);
+            fullTimes = displayData.map(item => item.fullTime);
+            
+            if (labels.length === 0) {
+                labels.push(`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`);
+                fullTimes.push(`${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${labels[0]}:00`);
+            }
+
+            sensors.forEach(s => {
+                let dataArr = displayData.map(item => item.data[s.id] !== undefined ? item.data[s.id] : null);
+                if (dataArr.length === 0) dataArr.push(null);
+
+                const range = s.max - s.min;
+                const buffer = range * 0.2;
+
+                metricConfig[s.id] = {
+                    label: s.name,
+                    title: `${s.name}变化曲线 (${s.unit})`,
+                    data: dataArr,
+                    unit: s.unit,
+                    borderColor: CHART_COLORS[s.color] || CHART_COLORS['slate'],
+                    gradientTop: CHART_BG_COLORS[s.color] || CHART_BG_COLORS['slate'],
+                    min: Math.max(0, s.min - buffer),
+                    max: s.max + buffer,
+                    stepSize: Math.ceil(range / 5) || 1,
+                    thMin: s.min,
+                    thMax: s.max
+                };
+            });
+            
+            if (!metricConfig[currentMetric]) {
+                currentMetric = sensors.length > 0 ? sensors[0].id : null;
+            }
+        }
+
+        function initChart() {
+            if (!currentMetric) return;
+            loadData();
+            initTabs();
+            const initialConfig = metricConfig[currentMetric];
+
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: initialConfig.label,
+                        data: initialConfig.data,
+                        borderColor: initialConfig.borderColor,
+                        backgroundColor: createGradient(initialConfig.gradientTop),
+                        fill: true,
+                        tension: 0.4, 
+                        pointRadius: labels.length > 50 ? 0 : 3.5, 
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: initialConfig.borderColor,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 450, easing: 'easeInOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.85)',
+                            titleFont: { size: 11 },
+                            bodyFont: { size: 12, weight: 'bold' },
+                            padding: 10,
+                            displayColors: false,
+                            cornerRadius: 8,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: initialConfig.min,
+                            max: initialConfig.max,
+                            grid: { color: '#f1f5f9', drawBorder: false, tickLength: 0 },
+                            ticks: { font: { size: 10, weight: '600' }, color: '#cbd5e1', stepSize: initialConfig.stepSize, padding: 8 }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { 
+                                font: { size: 10, weight: '600' }, color: '#cbd5e1', padding: 8,
+                                maxRotation: 45, minRotation: 45, autoSkip: true, maxTicksLimit: 12 
+                            }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+
+            renderTable(currentMetric);
+            updateTabStyles(currentMetric);
+        }
+
+        function renderTable(metricKey) {
+            const dataTableBody = document.getElementById('dataTableBody');
+            const selected = metricConfig[metricKey];
+            if (!selected) return;
+
+            const validDataCount = selected.data.filter(d => d !== null).length;
+            if (validDataCount === 0) {
+                dataTableBody.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-[12px]">暂无历史数据</div>';
+                return;
+            }
+            
+            let html = '';
+            const thMin = selected.thMin;
+            const thMax = selected.thMax;
+
+            for (let i = selected.data.length - 1; i >= 0; i--) {
+                const value = selected.data[i];
+                if (value === null) continue;
+                
+                const displayTime = fullTimes[i] || labels[i];
+                
+                const isExceed = (value < thMin || value > thMax);
+                const finalColor = isExceed ? 'text-red-500' : 'text-gray-800'; // Default text color for non-exceeding values
+                
+                // Find the original sensor config to get dataType and step
+                const sensorConfig = currentModel.sensors.find(s => s.id === metricKey) || {};
+                const decimals = typeof getDecimals === 'function' ? getDecimals(sensorConfig.dataType, sensorConfig.step) : 1;
+                
+                html += `
+                <div class="px-5 py-3.5 flex justify-between items-center text-[13px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition">
+                    <div class="flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full ${isExceed ? 'bg-red-400' : 'bg-gray-300'} mr-2.5"></span>
+                        <span class="text-gray-500">${displayTime}</span>
+                    </div>
+                    <span class="${finalColor} tracking-wide">${Number(value).toFixed(decimals)} <span class="text-[10px] ${isExceed ? 'text-red-400' : 'text-gray-400'} ml-0.5">${selected.unit}</span></span>
+                </div>`;
+            }
+            dataTableBody.innerHTML = html;
+        }
+
+        function updateTabStyles(metricKey) {
+            if (!metricConfig[metricKey]) return;
+            chartTitle.textContent = metricConfig[metricKey].title;
+            document.querySelectorAll('.metric-tab').forEach(tab => {
+                if (tab.dataset.metric === metricKey) {
+                    tab.classList.add('bg-white', 'text-blue-600', 'shadow-[0_2px_8px_rgba(0,0,0,0.04)]');
+                    tab.classList.remove('text-gray-500', 'hover:text-gray-700');
+                } else {
+                    tab.classList.remove('bg-white', 'text-blue-600', 'shadow-[0_2px_8px_rgba(0,0,0,0.04)]');
+                    tab.classList.add('text-gray-500', 'hover:text-gray-700');
+                }
+            });
+        }
+
+        function setMetric(metricKey) {
+            if (currentMetric === metricKey || !metricConfig[metricKey]) return;
+            currentMetric = metricKey;
+            
+            historyChartWrap.classList.add('opacity-70');
+            const selected = metricConfig[metricKey];
+
+            historyChart.data.datasets[0].label = selected.label;
+            historyChart.data.datasets[0].data = selected.data;
+            historyChart.data.datasets[0].borderColor = selected.borderColor;
+            historyChart.data.datasets[0].pointBorderColor = selected.borderColor;
+            historyChart.data.datasets[0].backgroundColor = createGradient(selected.gradientTop);
+            historyChart.options.scales.y.min = selected.min;
+            historyChart.options.scales.y.max = selected.max;
+            historyChart.options.scales.y.ticks.stepSize = selected.stepSize;
+            historyChart.update();
+
+            setTimeout(() => historyChartWrap.classList.remove('opacity-70'), 280);
+
+            renderTable(metricKey);
+            updateTabStyles(metricKey);
+        }
+
+        async function syncData() {
+            try {
+                if (typeof OneNetService !== 'undefined') {
+                    const data = await OneNetService.getLatestData();
+                    if (data) {
+                        const deviceStatusEl = document.getElementById('deviceStatus');
+                        if (data._isOnline === false) {
+                            deviceStatusEl.classList.remove('hidden');
+                            deviceStatusEl.innerHTML = '<span class="w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1 shadow-[0_0_4px_rgba(234,179,8,0.8)]"></span> 设备已离线';
+                            deviceStatusEl.classList.add('text-yellow-600');
+                        } else {
+                            deviceStatusEl.classList.remove('hidden');
+                            deviceStatusEl.innerHTML = '<span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1 shadow-[0_0_4px_rgba(34,197,94,0.8)]"></span> 设备在线';
+                            deviceStatusEl.classList.remove('text-yellow-600');
+                            deviceStatusEl.classList.add('text-green-500');
+                        }
+
+                        loadData();
+                        if (!currentMetric || !metricConfig[currentMetric]) return;
+                        
+                        const selected = metricConfig[currentMetric];
+                        
+                        historyChart.data.labels = labels;
+                        historyChart.data.datasets[0].data = selected.data;
+                        historyChart.data.datasets[0].pointRadius = labels.length > 50 ? 0 : 3.5;
+                        historyChart.update('none');
+                        
+                        renderTable(currentMetric);
+                    }
+                }
+            } catch (error) {
+                console.error('History sync failed:', error);
+            }
+        }
+
+        initChart();
+        setInterval(syncData, 30000);
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                const newModelStr = localStorage.getItem('iot_data_model');
+                if (newModelStr && JSON.stringify(currentModel) !== newModelStr) {
+                    window.location.reload(); // Simple reload handles chart re-init easily
+                }
+            }
+        });
+    </script>
+</body>
+</html>

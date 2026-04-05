@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>机房监控系统 - 报警记录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/config.js"></script>
+    <style>
+        body { background-color: #f4f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .card { background-color: white; border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .h-safe { height: env(safe-area-inset-bottom, 20px); }
+    </style>
+</head>
+<body class="pb-[6.5rem]">
+    <!-- Header -->
+    <header class="bg-white px-5 pt-[3.25rem] pb-4 flex items-center justify-between z-10 relative">
+        <a href="javascript:history.back()" class="text-gray-400 w-8 h-8 flex items-center justify-center -ml-2 active:bg-gray-100 rounded-full transition">
+            <i class="fas fa-chevron-left text-[1.1rem]"></i>
+        </a>
+        <h1 class="text-[1.2rem] font-bold text-gray-900 tracking-tight">报警记录</h1>
+        <div class="flex items-center space-x-4">
+            <div class="text-gray-400 cursor-pointer active:opacity-70 transition" onclick="clearAllAlerts()">
+                <i class="fas fa-trash-alt text-[14px]"></i>
+            </div>
+            <div class="text-blue-500 cursor-pointer active:opacity-70 transition" onclick="markAllAsRead()">
+                <span class="text-[13px] font-bold tracking-wide">一键已读</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Status Tabs -->
+    <div class="bg-white px-5 flex space-x-6 border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-b-[2rem]" id="statusTabs">
+        <button data-filter="all" class="tab-btn pb-3 border-b-2 border-blue-500 text-blue-500 font-bold px-1 transition text-[13px] tracking-wide">全部</button>
+        <button data-filter="unread" class="tab-btn pb-3 text-gray-400 font-bold px-1 hover:text-gray-600 transition text-[13px] tracking-wide border-b-2 border-transparent">未读</button>
+        <button data-filter="read" class="tab-btn pb-3 text-gray-400 font-bold px-1 hover:text-gray-600 transition text-[13px] tracking-wide border-b-2 border-transparent">已处理</button>
+    </div>
+
+    <main class="px-5 py-5 space-y-4" id="alertsList">
+        <!-- 动态生成的报警列表 -->
+    </main>
+
+    <!-- Custom Confirm Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center px-6 opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform scale-95 transition-transform duration-200">
+            <h3 class="text-[1.1rem] font-bold text-gray-900 mb-2">清空报警记录</h3>
+            <p class="text-[13px] text-gray-500 mb-6 leading-relaxed">确定要清空所有报警记录吗？此操作无法恢复。</p>
+            <div class="flex space-x-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-3 text-[14px] font-bold text-gray-600 bg-gray-100 active:bg-gray-200 rounded-xl transition">取消</button>
+                <button onclick="executeClearAll()" class="flex-1 py-3 text-[14px] font-bold text-white bg-red-500 active:bg-red-600 rounded-xl shadow-sm shadow-red-500/30 transition">确认清空</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full text-[13px] font-bold shadow-lg z-[110] transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+        <!-- Toast message -->
+    </div>
+
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+        <a href="index.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">首页</span>
+        </a>
+        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">监测</span>
+        </a>
+        <a href="control.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">控制</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="far fa-user text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">我的</span>
+        </a>
+        <div class="h-safe w-full absolute bottom-0"></div>
+    </nav>
+    <script>
+        // 动态加载报警数据
+        let alertsData = JSON.parse(localStorage.getItem('iot_alerts') || '[]');
+        const currentModel = typeof getDataModel === 'function' ? getDataModel() : { sensors: [] };
+
+        let currentFilter = 'all';
+
+        const alertsList = document.getElementById('alertsList');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+
+        function renderAlerts() {
+            const filteredData = alertsData.filter(item => {
+                if (currentFilter === 'all') return true;
+                return item.status === currentFilter;
+            });
+
+            if (filteredData.length === 0) {
+                alertsList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+                        <i class="fas fa-bell-slash text-[3rem] mb-4 opacity-20"></i>
+                        <span class="text-[13px] font-bold tracking-wide">暂无报警记录</span>
+                    </div>
+                ` + (currentFilter !== 'read' ? `
+                    <button onclick="switchToReadTab()" class="w-full py-4.5 text-[13px] font-bold text-blue-500 bg-blue-50/80 hover:bg-blue-50 rounded-[1.1rem] mt-6 transition border border-blue-100/50 shadow-[0_2px_8px_rgba(59,130,246,0.05)] active:scale-[0.98]">
+                        查看历史报警记录
+                    </button>
+                ` : '');
+                return;
+            }
+
+            alertsList.innerHTML = filteredData.map(alert => {
+                const sensorConfig = currentModel.sensors.find(s => s.id === alert.type) || {};
+                const decimals = typeof getDecimals === 'function' ? getDecimals(sensorConfig.dataType, sensorConfig.step) : 1;
+                let displayVal = parseFloat(alert.currentValue).toFixed(decimals);
+                let displayThresh = parseFloat(alert.threshold).toFixed(decimals);
+                
+                return `
+                <div class="card p-5 relative overflow-hidden border ${alert.status === 'unread' ? (alert.isCritical ? 'border-red-100/50 shadow-sm' : 'border-blue-100/50 shadow-sm') : 'border-gray-100/80 shadow-sm'}">
+                    ${alert.status === 'unread' ? `
+                        <div class="absolute left-0 top-0 bottom-0 w-1 ${alert.isCritical ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'}"></div>
+                    ` : ''}
+                    
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center">
+                            <span class="w-2.5 h-2.5 ${alert.status === 'unread' ? (alert.isCritical ? 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]' : 'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.6)]') : 'bg-gray-300'} rounded-full mr-2.5"></span>
+                            <h3 class="font-bold ${alert.status === 'unread' ? 'text-gray-900' : 'text-gray-400'} text-[15px] tracking-tight">${alert.title}</h3>
+                        </div>
+                        <span class="text-[11px] font-bold text-gray-400 font-mono">${alert.time}</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 ${alert.status === 'unread' ? 'mb-5' : ''} ml-5">
+                        <div>
+                            <div class="text-[11px] text-gray-400 font-bold tracking-wider mb-1">当前值</div>
+                            <div class="text-[1.1rem] font-bold ${alert.status === 'unread' ? (alert.isCritical ? 'text-red-500' : 'text-blue-500') : 'text-gray-400'}">${displayVal}<span class="text-[10px] ml-0.5">${alert.unit}</span></div>
+                        </div>
+                        <div>
+                            <div class="text-[11px] text-gray-400 font-bold tracking-wider mb-1">阈值</div>
+                            <div class="text-[1.1rem] font-bold ${alert.status === 'unread' ? 'text-gray-800' : 'text-gray-400'}">${displayThresh}<span class="text-[10px] ml-0.5">${alert.unit}</span></div>
+                        </div>
+                    </div>
+
+                    ${alert.status === 'unread' ? `
+                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-50">
+                            <button onclick="ignoreAlert(${alert.id})" class="px-5 py-2 text-[11px] font-bold text-gray-500 bg-gray-50 active:bg-gray-100 rounded-xl transition">忽略</button>
+                            <button onclick="viewDetail('${alert.type}')" class="px-5 py-2 text-[11px] font-bold text-white bg-blue-500 active:bg-blue-600 rounded-xl shadow-sm shadow-blue-500/30 transition">查看详情</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            }).join('') + (currentFilter !== 'read' ? `
+                 <button onclick="switchToReadTab()" class="w-full py-4.5 text-[13px] font-bold text-blue-500 bg-blue-50/80 hover:bg-blue-50 rounded-[1.1rem] mt-6 transition border border-blue-100/50 shadow-[0_2px_8px_rgba(59,130,246,0.05)] active:scale-[0.98]">
+                     查看历史报警记录
+                 </button>
+             ` : '');
+         }
+
+         function switchToReadTab() {
+             const readTab = document.querySelector('[data-filter="read"]');
+             if (readTab) readTab.click();
+             window.scrollTo({ top: 0, behavior: 'smooth' });
+         }
+
+         function markAllAsRead() {
+            alertsData.forEach(alert => {
+                alert.status = 'read';
+            });
+            localStorage.setItem('iot_alerts', JSON.stringify(alertsData));
+            renderAlerts();
+            showToast('已将所有报警标记为已处理');
+        }
+
+        function clearAllAlerts() {
+            if (alertsData.length === 0) {
+                showToast('暂无报警记录可清空');
+                return;
+            }
+            
+            const modal = document.getElementById('confirmModal');
+            const modalContent = modal.querySelector('div.bg-white');
+            
+            modal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+        
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            const modalContent = modal.querySelector('div.bg-white');
+            
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function executeClearAll() {
+            closeConfirmModal();
+            
+            alertsData = [];
+            localStorage.removeItem('iot_alerts');
+            localStorage.removeItem('iot_alarm_states'); // 同时重置状态，允许重新报警
+            
+            // 清除首页缓存的旧数据，避免切换回去时再次闪烁出旧数据报警
+            localStorage.removeItem('iot_latest_data');
+            
+            // 立即隐藏横幅（如果它之前在首页触发过）
+            const alertBanner = document.getElementById('alertBanner');
+            if(alertBanner) alertBanner.style.display = 'none';
+
+            renderAlerts();
+            
+            setTimeout(() => {
+                showToast('已清空所有报警记录！');
+            }, 200);
+        }
+        
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 2500);
+        }
+
+        function ignoreAlert(id) {
+            const alert = alertsData.find(a => a.id === id);
+            if (alert) {
+                alert.status = 'read';
+                localStorage.setItem('iot_alerts', JSON.stringify(alertsData));
+                renderAlerts();
+            }
+        }
+
+        function viewDetail(metricType) {
+            window.location.href = `history.html?metric=${metricType}`;
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update tabs styling
+                tabBtns.forEach(b => {
+                    b.classList.remove('border-blue-500', 'text-blue-500');
+                    b.classList.add('text-gray-400', 'border-transparent');
+                });
+                this.classList.add('border-blue-500', 'text-blue-500');
+                this.classList.remove('text-gray-400', 'border-transparent');
+
+                currentFilter = this.dataset.filter;
+                renderAlerts();
+            });
+        });
+
+        // 初始渲染
+        renderAlerts();
+    </script>
+</body>
+</html>

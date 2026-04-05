@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>机房监控系统 - 系统设置</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/config.js"></script>
+    <style>
+        body { background-color: #f4f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .card { background-color: white; border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        
+        .toggle-label {
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+        .toggle-label:after {
+            content: "";
+            position: absolute;
+            top: 0.2rem;
+            left: 0.2rem;
+            width: 1.4rem;
+            height: 1.4rem;
+            background-color: white;
+            border-radius: 9999px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(1.4rem);
+        }
+        
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .h-safe { height: env(safe-area-inset-bottom, 20px); }
+        
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms, transform 200ms; }
+    </style>
+</head>
+<body class="pb-[6.5rem]">
+    <!-- Header/Profile -->
+    <header class="bg-white px-5 pt-[3.5rem] pb-8 flex items-center border-b border-gray-100 mb-5 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-b-[2rem] z-10 relative">
+        <div class="w-[4.8rem] h-[4.8rem] rounded-[1.25rem] bg-gray-100 mr-4 overflow-hidden border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex-shrink-0 relative">
+            <img src="img/avatar.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\'><rect width=\'100%\' height=\'100%\' fill=\'%23f3f4f6\'/><text x=\'50%\' y=\'50%\' font-family=\'sans-serif\' font-size=\'12px\' fill=\'%239ca3af\' text-anchor=\'middle\' dy=\'.3em\'>头像未找到</text></svg>'" class="w-full h-full object-cover" alt="Admin">
+        </div>
+        <div class="flex-1">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-[1.35rem] font-bold text-gray-900 tracking-tight">硫氢化钠</h1>
+                    <p class="text-gray-400 text-[11px] mt-0.5 font-bold tracking-wide">ID: NaHS</p>
+                </div>
+                <span class="bg-blue-50 text-blue-500 text-[10px] font-bold px-2 py-1 rounded-md border border-blue-100/50">超级权限</span>
+            </div>
+            <p class="text-gray-400 text-[10px] mt-2 font-bold tracking-wide flex items-center">
+                <i class="fas fa-clock mr-1"></i> 上次登录: 今天 <span id="loginTime">08:50</span>
+            </p>
+        </div>
+    </header>
+
+    <main class="px-5 space-y-[1.4rem]">
+        
+        <!-- Dynamic Sensor & Device Management -->
+        <section>
+            <div class="flex justify-between items-center mb-2.5 px-1">
+                <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
+                    <i class="fas fa-microchip mr-1.5 text-[10px]"></i> 数据模型与阈值管理
+                </h3>
+                <div class="flex space-x-2">
+                    <button onclick="openDeviceModal('sensor')" class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md active:bg-blue-100 transition"><i class="fas fa-plus"></i> 传感器</button>
+                    <button onclick="openDeviceModal('control')" class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md active:bg-emerald-100 transition"><i class="fas fa-plus"></i> 控制器</button>
+                </div>
+            </div>
+            <div class="card overflow-hidden border border-gray-50" id="deviceListContainer">
+                <div class="divide-y divide-gray-50/80" id="deviceList">
+                    <!-- JS Dynamically injected -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Notification Settings -->
+        <section>
+            <h3 class="px-1 text-[11px] font-bold text-gray-400 uppercase mb-2.5 tracking-widest flex items-center">
+                <i class="fas fa-bell mr-1.5 text-[10px]"></i> 警报与通知
+            </h3>
+            <div class="card overflow-hidden border border-gray-50">
+                <div class="divide-y divide-gray-50/80">
+                    <div class="px-5 py-4.5 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-7 h-7 rounded-lg bg-yellow-50 flex items-center justify-center mr-3">
+                                <i class="fas fa-volume-up text-yellow-500 text-[13px]"></i>
+                            </div>
+                            <div>
+                                <div class="text-[14px] font-bold text-gray-800 tracking-wide">异常声音警报</div>
+                            </div>
+                        </div>
+                        <div class="relative inline-block w-[3.2rem] h-[1.8rem] align-middle select-none">
+                            <input type="checkbox" name="toggle-sound" id="toggle-sound" checked class="toggle-checkbox absolute block w-0 h-0 opacity-0 pointer-events-none"/>
+                            <label for="toggle-sound" class="toggle-label block overflow-hidden h-[1.8rem] rounded-full bg-blue-500 cursor-pointer transition-colors duration-300 relative"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- System & Cloud Platform -->
+        <section>
+            <h3 class="px-1 text-[11px] font-bold text-gray-400 uppercase mb-2.5 tracking-widest flex items-center">
+                <i class="fas fa-cog mr-1.5 text-[10px]"></i> 系统与云平台
+            </h3>
+            <div class="card overflow-hidden border border-gray-50">
+                <div class="divide-y divide-gray-50/80">
+                    <div class="px-5 py-4.5">
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5">系统名称</label>
+                        <p class="text-[10px] text-gray-400 mb-1.5">用于首页顶部展示，建议填写项目或机房名称，方便区分多套系统。</p>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="dashboardTitleInput" placeholder="OneNet物联网后台" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-bold focus:outline-none focus:border-blue-500">
+                            <button onclick="saveDashboardTitle()" class="px-4 py-2 text-[12px] font-bold text-white bg-blue-500 rounded-lg active:bg-blue-600 transition shadow-sm">保存</button>
+                        </div>
+                    </div>
+                    <div class="px-5 py-4.5 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="openOneNetConfigModal()">
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center">
+                                <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center mr-3">
+                                    <i class="fas fa-cloud text-indigo-500 text-[13px]"></i>
+                                </div>
+                                <div>
+                                    <span class="block text-[14px] font-bold text-gray-800 tracking-wide">OneNet 平台配置</span>
+                                    <span id="onenetStatusText" class="block text-[11px] text-gray-400 mt-0.5">未配置，点击后按提示填写即可连接云平台</span>
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-300 text-[10px] ml-3 flex-shrink-0"></i>
+                        </div>
+                    </div>
+                    <div class="px-5 py-4.5 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="clearCache()">
+                        <div class="flex items-center">
+                            <div class="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center mr-3">
+                                <i class="fas fa-trash-alt text-gray-400 text-[13px]"></i>
+                            </div>
+                            <div>
+                                <span class="block text-[14px] font-bold text-gray-800 tracking-wide">恢复默认/清除缓存</span>
+                                <span class="block text-[11px] text-gray-400 mt-0.5">清除本机数据模型、历史记录等缓存，用于更换设备或排查问题。</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300 text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Author Info -->
+        <section>
+            <h3 class="px-1 text-[11px] font-bold text-gray-400 uppercase mb-2.5 tracking-widest flex items-center">
+                <i class="fas fa-info-circle mr-1.5 text-[10px]"></i> 关于
+            </h3>
+            <div class="card overflow-hidden border border-gray-50">
+                <div class="px-5 py-5 bg-white flex flex-col items-center justify-center space-y-3">
+                    <div class="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center text-teal-500 mb-1">
+                        <i class="fas fa-code text-2xl"></i>
+                    </div>
+                    <h4 class="text-[14px] font-bold text-gray-900 tracking-tight">硫氢化钠开源物联网工具</h4>
+                    
+                    <div class="w-full space-y-2 mt-2">
+                        <div class="flex items-center justify-between bg-gray-50/80 p-3 rounded-xl">
+                            <div class="flex items-center text-gray-500">
+                                <i class="fas fa-user-edit w-5 text-center text-[13px]"></i>
+                                <span class="text-[12px] font-bold ml-1.5">作者</span>
+                            </div>
+                            <span class="text-[12px] font-bold text-gray-700">硫氢化钠</span>
+                        </div>
+                        
+                        <a href="mailto:liuqingla2005@163.com" class="flex items-center justify-between bg-gray-50/80 p-3 rounded-xl active:bg-gray-100 transition">
+                            <div class="flex items-center text-gray-500">
+                                <i class="fas fa-envelope w-5 text-center text-[13px]"></i>
+                                <span class="text-[12px] font-bold ml-1.5">邮箱</span>
+                            </div>
+                            <span class="text-[12px] font-bold text-blue-500">liuqingla2005@163.com</span>
+                        </a>
+                        
+                        <a href="https://space.bilibili.com/549713964?spm_id_from=333.1007.0.0" target="_blank" class="flex items-center justify-between bg-gray-50/80 p-3 rounded-xl active:bg-gray-100 transition">
+                            <div class="flex items-center text-gray-500">
+                                <i class="fab fa-bilibili w-5 text-center text-[13px]"></i>
+                                <span class="text-[12px] font-bold ml-1.5">B站主页</span>
+                            </div>
+                            <div class="flex items-center text-pink-400">
+                                <span class="text-[12px] font-bold mr-1">点击访问</span>
+                                <i class="fas fa-external-link-alt text-[10px]"></i>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="w-full mt-1.5 p-3 bg-amber-50/50 rounded-xl border border-amber-100/50">
+                        <p class="text-[10px] text-amber-600/80 font-bold leading-relaxed tracking-wide text-justify">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            免责声明：本软件为开源工具，仅供学习参考使用，不承担任何因使用引起的直接或间接责任。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <button onclick="logout()" class="w-full py-4 text-[15px] font-bold text-red-500 bg-white rounded-[1.25rem] shadow-[0_4px_10px_rgba(0,0,0,0.02)] border border-red-50 mb-8 active:scale-[0.98] active:bg-red-50 transition tracking-widest flex justify-center items-center">
+            <i class="fas fa-sign-out-alt mr-2"></i> 退出登录
+        </button>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+        <a href="index.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">首页</span>
+        </a>
+        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">监测</span>
+        </a>
+        <a href="control.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">控制</span>
+        </a>
+        <a href="settings.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-blue-500 relative">
+            <i class="fas fa-user text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">我的</span>
+        </a>
+        <div class="h-safe w-full absolute bottom-0"></div>
+    </nav>
+
+    <!-- Device Modal -->
+    <div id="deviceModal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity opacity-0" id="dmBackdrop" onclick="closeDeviceModal()"></div>
+        <div class="bg-white rounded-2xl w-[90%] max-w-[340px] max-h-[85vh] flex flex-col shadow-2xl z-10 transform scale-95 opacity-0 transition-all duration-200" id="dmContent">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                <div>
+                    <h3 id="dmTitle" class="text-[1.1rem] font-bold text-gray-900 tracking-tight">添加设备</h3>
+                    <p id="dmSubtitle" class="text-[10px] text-gray-400 font-bold tracking-wide mt-0.5">自定义数据模型与标识符</p>
+                </div>
+                <button id="dmDeleteBtn" class="hidden text-red-500 bg-red-50 w-8 h-8 rounded-full flex items-center justify-center" onclick="deleteCurrentDevice()">
+                    <i class="fas fa-trash-alt text-[12px]"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
+                <input type="hidden" id="dmType">
+                <input type="hidden" id="dmOriginalId">
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1">内部ID (唯一英文字母，如 co2)</label>
+                    <input type="text" id="dmId" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-mono focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1">显示名称 (如 二氧化碳)</label>
+                    <input type="text" id="dmName" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1">OneNet 云端标识符 (如 co2_value)</label>
+                    <input type="text" id="dmCloudKey" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-mono focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 flex justify-between items-center">
+                            <span>选择图标</span>
+                            <span id="dmSelectedIconPreview" class="text-blue-500"><i class="fas fa-microchip"></i></span>
+                        </label>
+                        <input type="hidden" id="dmIcon" value="fa-microchip">
+                        <div id="dmIconPicker" class="grid grid-cols-6 gap-2 max-h-32 overflow-y-auto p-2.5 border border-gray-200 rounded-lg bg-gray-50/50 custom-scrollbar">
+                            <!-- JS Dynamically injected -->
+                        </div>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">主题颜色</label>
+                        <select id="dmColor" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                            <option value="blue">蓝色 (Blue)</option>
+                            <option value="orange">橙色 (Orange)</option>
+                            <option value="red">红色 (Red)</option>
+                            <option value="green">绿色 (Green)</option>
+                            <option value="slate">灰色 (Slate)</option>
+                            <option value="cyan">青色 (Cyan)</option>
+                            <option value="yellow">黄色 (Yellow)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">数据类型</label>
+                        <select id="dmDataType" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500" onchange="toggleStepInput()">
+                            <option value="int32">整数 (int32)</option>
+                            <option value="float">浮点数 (float)</option>
+                            <option value="double">双精度 (double)</option>
+                            <option value="bool">布尔 (bool)</option>
+                            <option value="string">字符串 (string)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">步长</label>
+                        <input type="number" step="any" id="dmStep" placeholder="1" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div id="dmSensorFields" class="hidden space-y-4 border-t border-gray-100 pt-4 mt-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">单位 (如 ppm, ℃, %)</label>
+                        <input type="text" id="dmUnit" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-blue-500 mb-1">下限阈值</label>
+                            <input type="number" id="dmMin" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-red-500 mb-1">上限阈值</label>
+                            <input type="number" id="dmMax" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-5 pt-3 border-t border-gray-100 flex space-x-3">
+                <button onclick="closeDeviceModal()" class="flex-1 py-2.5 rounded-xl font-bold text-[13px] text-gray-500 bg-gray-100 active:bg-gray-200 transition">取消</button>
+                <button onclick="saveDeviceModal()" class="flex-1 py-2.5 rounded-xl font-bold text-[13px] text-white bg-blue-500 active:bg-blue-600 transition shadow-[0_4px_10px_rgba(59,130,246,0.3)]">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OneNet Config Modal -->
+    <div class="fixed inset-0 flex items-center justify-center z-[100] hidden" id="onenetModal">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity opacity-0" id="onenetModalBackdrop" onclick="closeOneNetConfigModal()"></div>
+        <div class="bg-white rounded-2xl w-[90%] max-w-[340px] flex flex-col shadow-2xl z-10 transform scale-95 opacity-0 transition-all duration-200" id="onenetModalContent">
+            <div class="p-6 pb-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-1 tracking-tight">OneNet 平台配置</h3>
+                <p class="text-[11px] text-gray-400 font-bold tracking-wide">在 OneNet 控制台创建产品与设备后，将以下信息完整复制到这里即可。</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 mb-1.5">产品 ID (Product ID)</label>
+                    <p class="text-[10px] text-gray-400 mb-1">来自 OneNet 控制台“产品管理”页面，例如：abc123。</p>
+                    <input type="text" id="configProductId" placeholder="例如：abc123" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 text-[14px] focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 mb-1.5">设备名称 (Device Name)</label>
+                    <p class="text-[10px] text-gray-400 mb-1">来自该产品下的“设备列表”，需要与云端设备名称保持一致。</p>
+                    <input type="text" id="configDeviceName" placeholder="例如：机房网关001" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 text-[14px] focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 mb-1.5">鉴权 Token (Authorization)</label>
+                    <p class="text-[10px] text-gray-400 mb-1">在设备详情页生成或复制完整 Token，包含签名与有效期信息。</p>
+                    <textarea id="configToken" rows="3" placeholder="粘贴从 OneNet 控制台复制的完整鉴权 Token" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 text-[12px] font-mono focus:outline-none focus:border-indigo-500 break-all"></textarea>
+                </div>
+            </div>
+            <div class="p-6 pt-0 flex space-x-3">
+                <button onclick="closeOneNetConfigModal()" class="flex-1 py-3 rounded-xl font-bold text-[13px] text-gray-500 bg-gray-100 active:bg-gray-200 transition">取消</button>
+                <button onclick="saveOneNetConfigModal()" class="flex-1 py-3 rounded-xl font-bold text-[13px] text-white bg-indigo-500 active:bg-indigo-600 transition">保存并重启</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center px-6 opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform scale-95 transition-transform duration-200" id="confirmModalContent">
+            <h3 class="text-[1.1rem] font-bold text-gray-900 mb-2" id="confirmTitle">确认操作</h3>
+            <p class="text-[13px] text-gray-500 mb-6 leading-relaxed" id="confirmMessage">确定要执行此操作吗？</p>
+            <div class="flex space-x-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-3 text-[14px] font-bold text-gray-600 bg-gray-100 active:bg-gray-200 rounded-xl transition">取消</button>
+                <button id="confirmExecuteBtn" class="flex-1 py-3 text-[14px] font-bold text-white bg-blue-500 active:bg-blue-600 rounded-xl shadow-sm transition">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2.5 rounded-full shadow-lg font-bold text-[12px] tracking-wide z-[110] transform -translate-y-10 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fas fa-check-circle text-green-400 mr-1.5"></i> <span id="toastMsg">操作成功</span>
+    </div>
+
+    <script>
+        let currentModel = getDataModel();
+        
+        let confirmAction = null;
+
+        function showConfirm(title, message, btnText, btnColorClass, action) {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = message;
+            
+            const execBtn = document.getElementById('confirmExecuteBtn');
+            execBtn.innerText = btnText;
+            execBtn.className = `flex-1 py-3 text-[14px] font-bold text-white rounded-xl shadow-sm transition ${btnColorClass}`;
+            
+            confirmAction = action;
+            
+            const modal = document.getElementById('confirmModal');
+            const modalContent = document.getElementById('confirmModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            const modalContent = document.getElementById('confirmModalContent');
+            
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                confirmAction = null;
+            }, 200);
+        }
+
+        document.getElementById('confirmExecuteBtn').addEventListener('click', () => {
+            if (confirmAction) confirmAction();
+            closeConfirmModal();
+        });
+
+        function loadSettings() {
+            renderDeviceList();
+            renderIconPicker();
+            
+            let config = JSON.parse(localStorage.getItem('iot_config') || '{}');
+            const soundToggle = document.getElementById('toggle-sound');
+            if (config.soundAlert !== undefined) soundToggle.checked = config.soundAlert;
+            updateToggleUI(soundToggle);
+            
+            document.getElementById('dashboardTitleInput').value = localStorage.getItem('iot_dashboard_title') || 'OneNet物联网后台';
+            
+            const onenetConfig = JSON.parse(localStorage.getItem('iot_onenet_config') || 'null');
+            const statusEl = document.getElementById('onenetStatusText');
+            if (statusEl) {
+                if (onenetConfig && onenetConfig.productId && onenetConfig.deviceName) {
+                    statusEl.innerText = `已绑定 ${onenetConfig.productId} / ${onenetConfig.deviceName}`;
+                    statusEl.classList.remove('text-gray-400');
+                    statusEl.classList.add('text-emerald-500');
+                } else {
+                    statusEl.innerText = '未配置，点击后按提示填写即可连接云平台';
+                    statusEl.classList.remove('text-emerald-500');
+                    statusEl.classList.add('text-gray-400');
+                }
+            }
+            
+            const now = new Date();
+            document.getElementById('loginTime').innerText = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        }
+
+        function saveDashboardTitle() {
+            const input = document.getElementById('dashboardTitleInput');
+            const newTitle = input.value.trim();
+            if (newTitle) {
+                localStorage.setItem('iot_dashboard_title', newTitle);
+                showToast('标题已保存，返回首页即可查看');
+            } else {
+                localStorage.removeItem('iot_dashboard_title');
+                showToast('已恢复默认标题');
+                input.value = 'OneNet物联网后台';
+            }
+        }
+
+        function updateToggleUI(toggle) {
+            const label = toggle.nextElementSibling;
+            if (toggle.checked) {
+                label.classList.remove('bg-gray-200');
+                label.classList.add('bg-blue-500');
+            } else {
+                label.classList.remove('bg-blue-500');
+                label.classList.add('bg-gray-200');
+            }
+        }
+
+        document.getElementById('toggle-sound').addEventListener('change', function() {
+            updateToggleUI(this);
+            let config = JSON.parse(localStorage.getItem('iot_config') || '{}');
+            config.soundAlert = this.checked;
+            localStorage.setItem('iot_config', JSON.stringify(config));
+            showToast(this.checked ? '警报音已开启' : '警报音已关闭');
+        });
+
+        function renderIconPicker() {
+            const picker = document.getElementById('dmIconPicker');
+            picker.innerHTML = COMMON_ICONS.map(icon => `
+                <div class="icon-option flex items-center justify-center w-10 h-10 rounded-lg cursor-pointer text-gray-400 hover:bg-white hover:text-blue-500 hover:shadow-sm transition" data-icon="${icon}" onclick="selectIcon('${icon}')">
+                    <i class="fas ${icon} text-[1.2rem]"></i>
+                </div>
+            `).join('');
+        }
+        
+        function selectIcon(iconClass) {
+            document.getElementById('dmIcon').value = iconClass;
+            document.getElementById('dmSelectedIconPreview').innerHTML = `<i class="fas ${iconClass}"></i>`;
+            
+            document.querySelectorAll('.icon-option').forEach(el => {
+                if (el.dataset.icon === iconClass) {
+                    el.classList.add('bg-white', 'text-blue-500', 'shadow-sm', 'ring-1', 'ring-blue-100');
+                    el.classList.remove('text-gray-400');
+                } else {
+                    el.classList.remove('bg-white', 'text-blue-500', 'shadow-sm', 'ring-1', 'ring-blue-100');
+                    el.classList.add('text-gray-400');
+                }
+            });
+        }
+
+        // --- Device List Rendering ---
+        function renderDeviceList() {
+            const container = document.getElementById('deviceList');
+            container.innerHTML = '';
+            
+            currentModel.sensors.forEach(sensor => {
+                const colors = COLOR_CLASSES[sensor.color] || COLOR_CLASSES['slate'];
+                container.innerHTML += `
+                    <div class="px-5 py-4 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="editDevice('sensor', '${sensor.id}')">
+                        <div class="flex items-center">
+                            <div class="w-9 h-9 rounded-xl ${colors.bg} flex items-center justify-center mr-3.5">
+                                <i class="fas ${sensor.icon} ${colors.text} text-[15px]"></i>
+                            </div>
+                            <div>
+                                <span class="block text-[15px] font-bold text-gray-800 tracking-wide">${sensor.name} <span class="text-[10px] text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded ml-1 border border-blue-100">传感器</span></span>
+                                <span class="block text-[11px] text-gray-400 font-mono mt-0.5">${sensor.cloudKey} | ${sensor.min}~${sensor.max}${sensor.unit}</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-edit text-gray-300 text-[12px]"></i>
+                    </div>
+                `;
+            });
+            
+            currentModel.controls.forEach(control => {
+                const colors = COLOR_CLASSES[control.color] || COLOR_CLASSES['slate'];
+                container.innerHTML += `
+                    <div class="px-5 py-4 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="editDevice('control', '${control.id}')">
+                        <div class="flex items-center">
+                            <div class="w-9 h-9 rounded-xl ${colors.bg} flex items-center justify-center mr-3.5">
+                                <i class="fas ${control.icon} ${colors.text} text-[15px]"></i>
+                            </div>
+                            <div>
+                                <span class="block text-[15px] font-bold text-gray-800 tracking-wide">${control.name} <span class="text-[10px] text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded ml-1 border border-emerald-100">控制器</span></span>
+                                <span class="block text-[11px] text-gray-400 font-mono mt-0.5">${control.cloudKey}</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-edit text-gray-300 text-[12px]"></i>
+                    </div>
+                `;
+            });
+        }
+
+        // --- Device Modal ---
+        function openDeviceModal(type) {
+            document.getElementById('dmType').value = type;
+            document.getElementById('dmOriginalId').value = '';
+            document.getElementById('dmTitle').innerText = type === 'sensor' ? '添加传感器' : '添加控制器';
+            document.getElementById('dmDeleteBtn').classList.add('hidden');
+            
+            // Reset fields
+            document.getElementById('dmId').value = '';
+            document.getElementById('dmId').disabled = false;
+            document.getElementById('dmName').value = '';
+            document.getElementById('dmCloudKey').value = '';
+            document.getElementById('dmColor').value = 'blue';
+            
+            selectIcon(type === 'sensor' ? 'fa-microchip' : 'fa-plug');
+            
+            document.getElementById('dmDataType').value = type === 'sensor' ? 'float' : 'bool';
+            document.getElementById('dmStep').value = '1';
+            
+            if (type === 'sensor') {
+                document.getElementById('dmSensorFields').classList.remove('hidden');
+                document.getElementById('dmUnit').value = '';
+                document.getElementById('dmMin').value = '0';
+                document.getElementById('dmMax').value = '100';
+            } else {
+                document.getElementById('dmSensorFields').classList.add('hidden');
+            }
+            
+            toggleStepInput();
+            showModal('deviceModal', 'dmBackdrop', 'dmContent');
+        }
+
+        function editDevice(type, id) {
+            const list = type === 'sensor' ? currentModel.sensors : currentModel.controls;
+            const device = list.find(d => d.id === id);
+            if (!device) return;
+
+            document.getElementById('dmType').value = type;
+            document.getElementById('dmOriginalId').value = id;
+            document.getElementById('dmTitle').innerText = '编辑设备';
+            document.getElementById('dmDeleteBtn').classList.remove('hidden');
+            
+            document.getElementById('dmId').value = device.id;
+            document.getElementById('dmId').disabled = true; // Prevent changing ID of existing
+            document.getElementById('dmName').value = device.name;
+            document.getElementById('dmCloudKey').value = device.cloudKey;
+            document.getElementById('dmIcon').value = device.icon;
+            document.getElementById('dmColor').value = device.color || 'blue';
+            
+            selectIcon(device.icon || (type === 'sensor' ? 'fa-microchip' : 'fa-plug'));
+            
+            document.getElementById('dmDataType').value = device.dataType || (type === 'sensor' ? 'float' : 'bool');
+            document.getElementById('dmStep').value = device.step || '1';
+            
+            if (type === 'sensor') {
+                document.getElementById('dmSensorFields').classList.remove('hidden');
+                document.getElementById('dmUnit').value = device.unit;
+                document.getElementById('dmMin').value = device.min;
+                document.getElementById('dmMax').value = device.max;
+            } else {
+                document.getElementById('dmSensorFields').classList.add('hidden');
+            }
+            
+            toggleStepInput();
+            showModal('deviceModal', 'dmBackdrop', 'dmContent');
+        }
+
+        function toggleStepInput() {
+            const type = document.getElementById('dmDataType').value;
+            const stepInput = document.getElementById('dmStep');
+            if (type === 'int32' || type === 'float' || type === 'double') {
+                stepInput.disabled = false;
+                stepInput.classList.remove('bg-gray-100', 'text-gray-400');
+            } else {
+                stepInput.disabled = true;
+                stepInput.value = '';
+                stepInput.classList.add('bg-gray-100', 'text-gray-400');
+            }
+        }
+
+        function saveDeviceModal() {
+            const type = document.getElementById('dmType').value;
+            const originalId = document.getElementById('dmOriginalId').value;
+            const id = document.getElementById('dmId').value.trim();
+            
+            if (!id || !/^[a-zA-Z0-9_]+$/.test(id)) {
+                alert('内部ID必须为英文字母、数字或下划线');
+                return;
+            }
+
+            const device = {
+                id: id,
+                name: document.getElementById('dmName').value.trim() || '未命名',
+                cloudKey: document.getElementById('dmCloudKey').value.trim() || id,
+                icon: document.getElementById('dmIcon').value.trim() || (type === 'sensor' ? 'fa-microchip' : 'fa-plug'),
+                color: document.getElementById('dmColor').value,
+                dataType: document.getElementById('dmDataType').value,
+                step: parseFloat(document.getElementById('dmStep').value) || 1
+            };
+
+            if (type === 'sensor') {
+                device.unit = document.getElementById('dmUnit').value.trim();
+                device.min = parseFloat(document.getElementById('dmMin').value) || 0;
+                device.max = parseFloat(document.getElementById('dmMax').value) || 100;
+            }
+
+            const list = type === 'sensor' ? currentModel.sensors : currentModel.controls;
+
+            if (originalId) {
+                const idx = list.findIndex(d => d.id === originalId);
+                if (idx !== -1) list[idx] = device;
+            } else {
+                if (currentModel.sensors.find(d => d.id === id) || currentModel.controls.find(d => d.id === id)) {
+                    alert('ID已存在，请使用其他ID');
+                    return;
+                }
+                list.push(device);
+            }
+
+            saveDataModel(currentModel);
+            localStorage.removeItem('iot_latest_data'); // 清除缓存强制拉取最新配置数据
+            renderDeviceList();
+            closeDeviceModal();
+            showToast('设备已保存');
+        }
+
+        function deleteCurrentDevice() {
+            showConfirm(
+                '删除设备',
+                '确定要删除此设备吗？相关的UI卡片和历史数据将不再显示。',
+                '确认删除',
+                'bg-red-500 hover:bg-red-600',
+                () => {
+                    const type = document.getElementById('dmType').value;
+                    const id = document.getElementById('dmOriginalId').value;
+                    const list = type === 'sensor' ? currentModel.sensors : currentModel.controls;
+                    
+                    const idx = list.findIndex(d => d.id === id);
+                    if (idx !== -1) {
+                        list.splice(idx, 1);
+                        saveDataModel(currentModel);
+                        localStorage.removeItem('iot_latest_data'); // 清除缓存强制拉取最新配置数据
+                        renderDeviceList();
+                    }
+                    closeDeviceModal();
+                    showToast('设备已删除');
+                }
+            );
+        }
+
+        function closeDeviceModal() { hideModal('deviceModal', 'dmBackdrop', 'dmContent'); }
+
+        // --- OneNet Modal ---
+        function openOneNetConfigModal() {
+            const userConfig = JSON.parse(localStorage.getItem('iot_onenet_config') || 'null');
+            if (userConfig) {
+                document.getElementById('configProductId').value = userConfig.productId || '';
+                document.getElementById('configDeviceName').value = userConfig.deviceName || '';
+                document.getElementById('configToken').value = userConfig.token || '';
+            }
+            showModal('onenetModal', 'onenetModalBackdrop', 'onenetModalContent');
+        }
+
+        function closeOneNetConfigModal() { hideModal('onenetModal', 'onenetModalBackdrop', 'onenetModalContent'); }
+
+        function saveOneNetConfigModal() {
+            const productId = document.getElementById('configProductId').value.trim();
+            const deviceName = document.getElementById('configDeviceName').value.trim();
+            const token = document.getElementById('configToken').value.trim();
+            
+            if (!productId || !deviceName || !token) { alert('请填写完整'); return; }
+            
+            localStorage.setItem('iot_onenet_config', JSON.stringify({ productId, deviceName, token }));
+            // 清除旧的设备缓存和报警，避免串台
+            localStorage.removeItem('iot_latest_data');
+            localStorage.removeItem('iot_history_data');
+            localStorage.removeItem('iot_alerts');
+            localStorage.removeItem('iot_alarm_states');
+            
+            closeOneNetConfigModal();
+            showToast('云平台配置已保存，即将重新加载...');
+            setTimeout(() => window.location.reload(), 1000);
+        }
+
+        // --- Utility ---
+        function showModal(modalId, bgId, contentId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                document.getElementById(bgId).classList.remove('opacity-0');
+                document.getElementById(contentId).classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+
+        function hideModal(modalId, bgId, contentId) {
+            document.getElementById(bgId).classList.add('opacity-0');
+            document.getElementById(contentId).classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                const modal = document.getElementById(modalId);
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('-translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-10', 'opacity-0');
+            }, 2000);
+        }
+
+        function clearCache() {
+            showConfirm(
+                '清除缓存并重置',
+                '确定要清除所有缓存并恢复默认配置吗？这会删除所有的历史数据、警报记录和自定义设置。',
+                '确认清除',
+                'bg-red-500 hover:bg-red-600',
+                () => {
+                    localStorage.clear();
+                    showToast('已重置');
+                    setTimeout(() => window.location.reload(), 800);
+                }
+            );
+        }
+
+        function logout() {
+            showConfirm(
+                '退出登录',
+                '确定要退出当前账号吗？',
+                '退出登录',
+                'bg-red-500 hover:bg-red-600',
+                () => {
+                    window.location.href = 'login.html';
+                }
+            );
+        }
+
+        window.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+</html>
