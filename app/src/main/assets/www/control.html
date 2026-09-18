@@ -13,7 +13,6 @@
     <style>
         .input-inline { width: 88px; padding: 7px 8px; font-size: 13px; text-align: center; border-radius: 9px; }
         .input-inline-text { width: 110px; text-align: left; }
-        .log-time { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     </style>
 </head>
 <body class="pb-nav">
@@ -25,8 +24,8 @@
         <h1 class="subheader-title">设备远程控制</h1>
         <div class="subheader-side">
             <div class="flex items-center gap-1.5">
-                <span class="dot dot-ok"></span>
-                <span class="text-ok" style="font-size: 11px;">设备在线</span>
+                <span id="connIndicator" class="dot dot-off"></span>
+                <span id="connStatus" style="font-size: 11px;" class="text-tip">未连接</span>
             </div>
         </div>
     </header>
@@ -134,12 +133,12 @@
                 container.innerHTML += `
                     <div class="card p-4 flex items-center justify-between">
                         <div class="flex items-center gap-3.5">
-                            <div class="tile ${colors.bg}" style="width: 48px; height: 48px; font-size: 20px;">
+                            <div class="tile tile-lg ${colors.bg}">
                                 <i class="fas ${c.icon}"></i>
                             </div>
                             <div>
                                 <h2 class="text-base font-medium">${c.name}</h2>
-                                <p class="text-tip text-xs mt-0.5 log-time">${c.cloudKey}</p>
+                                <p class="text-tip text-xs mt-0.5 mono">${c.cloudKey}</p>
                             </div>
                         </div>
                         ${controlUI}
@@ -178,7 +177,7 @@
                         </div>
                         <div>
                             <h4 class="text-sm font-medium">${title}</h4>
-                            <p class="text-tip mt-0.5 log-time" style="font-size: 11px;">${log.time}</p>
+                            <p class="text-tip mono mt-0.5" style="font-size: 11px;">${log.time}</p>
                         </div>
                     </div>
                     <span class="tag tag-ok">执行成功</span>
@@ -295,6 +294,19 @@
                 if (typeof OneNetService !== 'undefined') {
                     const data = await OneNetService.getLatestData();
                     if (data) {
+                        const connIndicator = document.getElementById('connIndicator');
+                        const connStatus = document.getElementById('connStatus');
+                        if (connIndicator && connStatus) {
+                            if (data._isOnline === false) {
+                                connIndicator.className = 'dot dot-warn';
+                                connStatus.innerText = '设备离线';
+                                connStatus.className = 'text-warn';
+                            } else {
+                                connIndicator.className = 'dot dot-ok';
+                                connStatus.innerText = '设备在线';
+                                connStatus.className = 'text-ok';
+                            }
+                        }
                         controls.forEach(c => {
                             if (data[c.id] !== undefined) {
                                 if (c.dataType === 'int32' || c.dataType === 'float' || c.dataType === 'double') {

@@ -60,13 +60,21 @@
             background-color: #141414;
             z-index: 10;
         }
+        .video-exit {
+            position: absolute; top: 24px; right: 24px; z-index: 10000;
+            width: 40px; height: 40px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            color: #fff; background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .video-exit.open { display: flex; }
+        .video-exit:active { background: rgba(0, 0, 0, 0.6); }
         .overlay-btn {
             margin-top: 14px; padding: 8px 16px; border-radius: 9px;
             font-size: 12px; font-weight: 500; border: 1px solid var(--border);
             background: var(--card); color: var(--text);
         }
         .overlay-btn:active { opacity: 0.8; }
-        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     </style>
 </head>
 <body class="pb-nav">
@@ -105,7 +113,7 @@
             </div>
 
             <div class="video-container" id="videoContainer">
-                <button id="exitFullscreenBtn" onclick="toggleFullScreen()" class="hidden absolute top-6 right-6 z-[10000] w-10 h-10 text-white rounded-full items-center justify-center" style="background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.2);">
+                <button id="exitFullscreenBtn" onclick="toggleFullScreen()" class="video-exit">
                     <i class="fas fa-compress"></i>
                 </button>
                 <div id="loadingOverlay" class="loading-overlay">
@@ -186,7 +194,7 @@
                         <div>
                             <h3 class="text-xs font-medium mb-0.5">${item.name}</h3>
                             <div class="flex items-baseline">
-                                <span class="text-lg font-medium num ${colors.text}" id="val-${item.id}">--</span>
+                                <span class="text-xl font-medium num ${colors.text}" id="val-${item.id}">--</span>
                                 ${item.unit ? `<span class="text-tip ml-1" style="font-size: 10px;">${item.unit}</span>` : ''}
                             </div>
                         </div>
@@ -397,8 +405,7 @@
             if (container.classList.contains('fullscreen')) {
                 // Exit fullscreen
                 container.classList.remove('fullscreen');
-                exitBtn.classList.add('hidden');
-                exitBtn.classList.remove('flex');
+                exitBtn.classList.remove('open');
 
                 if (document.exitFullscreen) {
                     document.exitFullscreen().catch(err => console.log(err));
@@ -408,8 +415,7 @@
             } else {
                 // Enter fullscreen
                 container.classList.add('fullscreen');
-                exitBtn.classList.remove('hidden');
-                exitBtn.classList.add('flex');
+                exitBtn.classList.add('open');
 
                 if (container.requestFullscreen) {
                     container.requestFullscreen().catch(err => console.log(err));
@@ -431,8 +437,7 @@
 
             if (!isFullscreen && container.classList.contains('fullscreen')) {
                 container.classList.remove('fullscreen');
-                exitBtn.classList.add('hidden');
-                exitBtn.classList.remove('flex');
+                exitBtn.classList.remove('open');
             }
         }
 

@@ -30,7 +30,7 @@
 
     <main class="px-5 mt-4 flex flex-col gap-4">
         <!-- Alert Banner -->
-        <a href="alerts.html" id="alertBanner" class="hidden card items-center justify-between p-4" style="background: var(--danger-bg); border-color: transparent;">
+        <a href="alerts.html" id="alertBanner" class="hidden banner-danger items-center justify-between p-4">
             <div class="flex items-center gap-3">
                 <div class="tile" style="background: var(--danger); color: #fff;">
                     <i class="fas fa-exclamation-triangle text-sm"></i>
@@ -52,19 +52,19 @@
         <div class="card p-4">
             <div class="grid grid-cols-3 gap-2">
                 <a href="history.html" class="flex flex-col items-center gap-2 pressable">
-                    <div class="tile bg-muted text-sub" style="width: 48px; height: 48px; font-size: 18px;">
+                    <div class="tile tile-lg bg-muted text-sub" style="font-size: 18px;">
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <span class="text-xs text-sub">历史数据</span>
                 </a>
                 <a href="alerts.html" class="flex flex-col items-center gap-2 pressable">
-                    <div class="tile bg-muted text-sub" style="width: 48px; height: 48px; font-size: 18px;">
+                    <div class="tile tile-lg bg-muted text-sub" style="font-size: 18px;">
                         <i class="fas fa-bell"></i>
                     </div>
                     <span class="text-xs text-sub">报警记录</span>
                 </a>
                 <a href="settings.html" class="flex flex-col items-center gap-2 pressable">
-                    <div class="tile bg-muted text-sub" style="width: 48px; height: 48px; font-size: 18px;">
+                    <div class="tile tile-lg bg-muted text-sub" style="font-size: 18px;">
                         <i class="fas fa-cog"></i>
                     </div>
                     <span class="text-xs text-sub">系统设置</span>
@@ -142,7 +142,7 @@
             currentModel.sensors.forEach(s => {
                 const colors = COLOR_CLASSES[s.color] || COLOR_CLASSES['slate'];
                 grid.innerHTML += `
-                    <a href="monitoring.html" class="card p-4 flex flex-col justify-between pressable" style="min-height: 104px;">
+                    <a href="monitoring.html" class="card stat-card p-4 flex flex-col justify-between pressable">
                         <div class="flex justify-between items-start mb-3">
                             <div class="tile ${colors.bg}">
                                 <i class="fas ${s.icon}"></i>

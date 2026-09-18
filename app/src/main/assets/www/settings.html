@@ -15,7 +15,6 @@
             background: var(--card-2); flex-shrink: 0;
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
         .input-sm { padding: 9px 12px; font-size: 13px; border-radius: 10px; }
         .icon-option {
             display: flex; align-items: center; justify-content: center;
@@ -97,7 +96,7 @@
         <section>
             <h3 class="list-title flex items-center gap-1.5"><i class="fas fa-cog" style="font-size: 11px;"></i> 系统与云平台</h3>
             <div class="list">
-                <div class="cell flex-col items-stretch gap-2" style="padding: 14px 16px;">
+                <div class="cell-form">
                     <label class="form-label" style="margin: 0;">系统名称</label>
                     <p class="text-xs text-tip">用于首页顶部展示，建议填写项目或机房名称，方便区分多套系统。</p>
                     <div class="flex items-center gap-2">
@@ -106,7 +105,7 @@
                     </div>
                 </div>
 
-                <div class="cell flex-col items-stretch gap-2" style="padding: 14px 16px;">
+                <div class="cell-form">
                     <label class="form-label" style="margin: 0;">视频流监控地址</label>
                     <p class="text-xs text-tip">填写您部署的视频流地址，例如：http://192.168.1.100:8080/video</p>
                     <div class="flex items-center gap-2">
@@ -114,7 +113,7 @@
                         <button onclick="saveVideoUrl()" class="btn btn-primary btn-sm">保存</button>
                     </div>
                 </div>
-                <div class="cell flex-col items-stretch gap-2" style="padding: 14px 16px;">
+                <div class="cell-form">
                     <label class="form-label" style="margin: 0;">视频页面标题</label>
                     <p class="text-xs text-tip">自定义视频监控页面的顶部标题展示内容。</p>
                     <div class="flex items-center gap-2">

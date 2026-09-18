@@ -82,7 +82,7 @@ body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     font-size: 15px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
@@ -110,7 +110,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
     padding: calc(env(safe-area-inset-top, 0px) + 24px) 20px 8px;
 }
 .header-row { display: flex; align-items: center; justify-content: space-between; }
-.header-title { font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.header-title { font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.3; letter-spacing: -0.01em; }
 .header-sub {
     display: flex; align-items: center; gap: 6px;
     margin-top: 4px; font-size: 12px; color: var(--text-2);
@@ -123,6 +123,9 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .icon-btn:active { transform: scale(0.94); }
 .icon-btn:disabled { opacity: 0.6; }
+
+/* 等宽（ID / 标识符 / 时间戳） */
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 /* ============ 4. 卡片与图标 ============ */
 .card {
@@ -137,6 +140,16 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
     display: flex; align-items: center; justify-content: center; font-size: 15px;
 }
 .tile-sm { width: 30px; height: 30px; border-radius: 8px; font-size: 13px; }
+.tile-lg { width: 48px; height: 48px; border-radius: 12px; font-size: 20px; }
+
+/* 首页统计卡最小高度 */
+.stat-card { min-height: 104px; }
+
+/* 首页报警横幅 */
+.banner-danger {
+    background: var(--danger-bg); border: 1px solid transparent;
+    border-radius: var(--radius);
+}
 
 /* 状态小圆点（无光晕） */
 .dot {
@@ -363,6 +376,11 @@ textarea.input { resize: vertical; }
 .cell-label { flex: 1; min-width: 0; }
 .cell-hint { font-size: 12px; color: var(--text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell-value { color: var(--text-2); font-size: 13px; flex-shrink: 0; }
+.cell-form {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+}
+.cell-form:last-child { border-bottom: none; }
 .cell .chevron { color: var(--text-3); font-size: 12px; flex-shrink: 0; }
 
 /* ============ 14. 图表 / 视频容器 ============ */
@@ -429,6 +447,7 @@ textarea.input { resize: vertical; }
 .py-2 { padding-top: 8px; padding-bottom: 8px; }
 .py-2\.5 { padding-top: 10px; padding-bottom: 10px; }
 .py-3 { padding-top: 12px; padding-bottom: 12px; }
+.py-20 { padding-top: 80px; padding-bottom: 80px; }
 .py-3\.5 { padding-top: 14px; padding-bottom: 14px; }
 .py-4 { padding-top: 16px; padding-bottom: 16px; }
 .py-4\.5 { padding-top: 18px; padding-bottom: 18px; }
@@ -661,7 +680,7 @@ textarea.input { resize: vertical; }
 
 /* 间距 gap */
 .gap-1 { gap: 4px; } .gap-1\.5 { gap: 6px; } .gap-2 { gap: 8px; } .gap-2\.5 { gap: 10px; }
-.gap-3 { gap: 12px; } .gap-3\.5 { gap: 14px; } .gap-4 { gap: 16px; } .gap-5 { gap: 20px; }
+.gap-3 { gap: 12px; } .gap-3\.5 { gap: 14px; } .gap-4 { gap: 16px; } .gap-5 { gap: 20px; } .gap-6 { gap: 24px; }
 
 /* 文本 */
 .text-xs { font-size: 12px; }
@@ -670,6 +689,7 @@ textarea.input { resize: vertical; }
 .text-lg { font-size: 18px; }
 .text-xl { font-size: 20px; }
 .text-2xl { font-size: 24px; }
+.text-3xl { font-size: 30px; }
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
 .text-center { text-align: center; }
@@ -699,6 +719,9 @@ textarea.input { resize: vertical; }
 
 /* 尺寸 */
 .w-full { width: 100%; }
+.w-4 { width: 16px; }
+.w-5 { width: 20px; }
+.h-4 { height: 16px; }
 .h-full { height: 100%; }
 .min-h-screen { min-height: 100vh; }
 .relative { position: relative; }
@@ -709,10 +732,12 @@ textarea.input { resize: vertical; }
 .overflow-hidden { overflow: hidden; }
 .overflow-auto { overflow: auto; }
 .overflow-y-auto { overflow-y: auto; }
+.overflow-x-auto { overflow-x: auto; }
 .cursor-pointer { cursor: pointer; }
 .select-none { user-select: none; }
 .transition { transition: all 0.15s ease; }
 .opacity-50 { opacity: 0.5; }
+.opacity-30 { opacity: 0.3; }
 .opacity-0 { opacity: 0; }
 .z-10 { z-index: 10; }
 .z-50 { z-index: 50; }
