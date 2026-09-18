@@ -58,16 +58,16 @@ function getDecimals(dataType, step) {
     return 0;
 }
 
-// UI Color mapping helpers
+// UI Color mapping helpers（对应 css/common.css 中的语义色板类）
 const COLOR_CLASSES = {
-    'orange': { bg: 'bg-orange-50', text: 'text-orange-500', border: 'border-orange-100/50', fill: 'bg-orange-500' },
-    'blue': { bg: 'bg-blue-50', text: 'text-blue-500', border: 'border-blue-100/50', fill: 'bg-blue-500' },
-    'slate': { bg: 'bg-slate-50', text: 'text-slate-500', border: 'border-slate-100/50', fill: 'bg-slate-500' },
-    'cyan': { bg: 'bg-cyan-50', text: 'text-cyan-500', border: 'border-cyan-100/50', fill: 'bg-cyan-500' },
-    'teal': { bg: 'bg-teal-50', text: 'text-teal-500', border: 'border-teal-100/50', fill: 'bg-teal-500' },
-    'yellow': { bg: 'bg-yellow-50', text: 'text-yellow-500', border: 'border-yellow-100/50', fill: 'bg-yellow-500' },
-    'red': { bg: 'bg-red-50', text: 'text-red-500', border: 'border-red-100/50', fill: 'bg-red-500' },
-    'green': { bg: 'bg-green-50', text: 'text-green-500', border: 'border-green-100/50', fill: 'bg-green-500' },
-    'purple': { bg: 'bg-purple-50', text: 'text-purple-500', border: 'border-purple-100/50', fill: 'bg-purple-500' },
-    'pink': { bg: 'bg-pink-50', text: 'text-pink-500', border: 'border-pink-100/50', fill: 'bg-pink-500' }
+    'orange': { bg: 'tile-orange', text: 'c-orange', chip: 'chip-orange', border: '', fill: 'fill-orange' },
+    'blue': { bg: 'tile-blue', text: 'c-blue', chip: 'chip-blue', border: '', fill: 'fill-blue' },
+    'slate': { bg: 'tile-slate', text: 'c-slate', chip: 'chip-slate', border: '', fill: 'fill-slate' },
+    'cyan': { bg: 'tile-cyan', text: 'c-cyan', chip: 'chip-cyan', border: '', fill: 'fill-cyan' },
+    'teal': { bg: 'tile-teal', text: 'c-teal', chip: 'chip-teal', border: '', fill: 'fill-teal' },
+    'yellow': { bg: 'tile-yellow', text: 'c-yellow', chip: 'chip-yellow', border: '', fill: 'fill-yellow' },
+    'red': { bg: 'tile-red', text: 'c-red', chip: 'chip-red', border: '', fill: 'fill-red' },
+    'green': { bg: 'tile-green', text: 'c-green', chip: 'chip-green', border: '', fill: 'fill-green' },
+    'purple': { bg: 'tile-purple', text: 'c-purple', chip: 'chip-purple', border: '', fill: 'fill-purple' },
+    'pink': { bg: 'tile-pink', text: 'c-pink', chip: 'chip-pink', border: '', fill: 'fill-pink' }
 };
