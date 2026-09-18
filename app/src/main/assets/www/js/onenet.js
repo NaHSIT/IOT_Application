@@ -107,7 +107,7 @@ class OneNetService {
                 });
                 
                 // 2. 根据用户的动态数据模型配置，将数据转化为前端标准标识符
-                const model = typeof getDataModel === 'function' ? getDataModel() : { sensors: [], controls: [] };
+                const model = typeof getDataModel === 'function' ? getDataModel() : { sensors: [], controls: [], videoData: [] };
                 
                 model.sensors.forEach(s => {
                     if (rawData[s.cloudKey] !== undefined) data[s.id] = rawData[s.cloudKey];
@@ -115,6 +115,11 @@ class OneNetService {
                 model.controls.forEach(c => {
                     if (rawData[c.cloudKey] !== undefined) data[c.id] = rawData[c.cloudKey];
                 });
+                if (model.videoData) {
+                    model.videoData.forEach(v => {
+                        if (rawData[v.cloudKey] !== undefined) data[v.id] = rawData[v.cloudKey];
+                    });
+                }
                 
                 // 将最新数据缓存到 localStorage，避免页面切换时的闪烁和预设值问题
                 // 合并现有缓存，保留可能存在的乐观更新状态
@@ -186,14 +191,20 @@ class OneNetService {
      */
     static getMockData() {
         const mockData = { _isMock: true };
-        const model = typeof getDataModel === 'function' ? getDataModel() : { sensors: [], controls: [] };
+        const model = typeof getDataModel === 'function' ? getDataModel() : { sensors: [], controls: [], videoData: [] };
         
         model.sensors.forEach(s => {
-            const range = s.max - s.min;
-            const mid = s.min + range / 2;
-            const rawVal = mid + (Math.random() * (range * 0.2) - (range * 0.1));
-            const decimals = typeof getDecimals === 'function' ? getDecimals(s.dataType, s.step) : 1;
-            mockData[s.id] = Number(rawVal.toFixed(decimals));
+            if (s.dataType === 'string') {
+                mockData[s.id] = "模拟文本";
+            } else if (s.dataType === 'boolean') {
+                mockData[s.id] = Math.random() > 0.5;
+            } else {
+                const range = s.max - s.min;
+                const mid = s.min + range / 2;
+                const rawVal = mid + (Math.random() * (range * 0.2) - (range * 0.1));
+                const decimals = typeof getDecimals === 'function' ? getDecimals(s.dataType, s.step) : 1;
+                mockData[s.id] = Number(rawVal.toFixed(decimals));
+            }
         });
         model.controls.forEach(c => {
             if (c.dataType === 'int32') {
@@ -207,6 +218,22 @@ class OneNetService {
                 mockData[c.id] = Math.random() > 0.5;
             }
         });
+        if (model.videoData) {
+            model.videoData.forEach(v => {
+                if (v.dataType === 'string') {
+                    mockData[v.id] = "模拟附加数据";
+                } else if (v.dataType === 'boolean') {
+                    mockData[v.id] = Math.random() > 0.5;
+                } else {
+                    const range = (v.max !== undefined && v.min !== undefined) ? v.max - v.min : 100;
+                    const min = v.min !== undefined ? v.min : 0;
+                    const rawVal = min + Math.random() * range;
+                    const decimals = typeof getDecimals === 'function' ? getDecimals(v.dataType, v.step) : 1;
+                    mockData[v.id] = Number(rawVal.toFixed(decimals));
+                }
+            });
+        }
+        
         return mockData;
     }
 
@@ -217,14 +244,34 @@ class OneNetService {
     static async setProperty(params) {
         const config = getOneNetConfig();
         try {
+            // 如果处于未配置或 Mock 模式，直接返回成功以供 UI 预览
+            if (config.TOKEN.includes('YOUR_')) {
+                console.warn('OneNet Token is not configured. Mocking setProperty success.');
+                
+                const cachedData = JSON.parse(localStorage.getItem('iot_latest_data') || '{}');
+                const controlLocks = JSON.parse(localStorage.getItem('iot_control_locks') || '{}');
+                const now = Date.now();
+                
+                for (const key in params) {
+                    cachedData[key] = params[key];
+                    controlLocks[key] = now; 
+                }
+                
+                localStorage.setItem('iot_latest_data', JSON.stringify(cachedData));
+                localStorage.setItem('iot_control_locks', JSON.stringify(controlLocks));
+                
+                return true;
+            }
+
             // 将内部的属性名转换为用户配置的云端属性名
             const mappedParams = {};
-            const model = typeof getDataModel === 'function' ? getDataModel() : { sensors: [], controls: [] };
+            const model = typeof getDataModel === 'function' ? getDataModel() : { sensors: [], controls: [], videoData: [] };
             
             // 构建反向映射: appId -> cloudKey
             const reverseMap = {};
-            model.controls.forEach(c => reverseMap[c.id] = c.cloudKey);
-            model.sensors.forEach(s => reverseMap[s.id] = s.cloudKey);
+            if (model.controls) model.controls.forEach(c => reverseMap[c.id] = c.cloudKey);
+            if (model.sensors) model.sensors.forEach(s => reverseMap[s.id] = s.cloudKey);
+            if (model.videoData) model.videoData.forEach(v => reverseMap[v.id] = v.cloudKey);
 
             for (const key in params) {
                 if (reverseMap[key]) {
@@ -249,6 +296,11 @@ class OneNetService {
                     params: mappedParams
                 })
             });
+
+            if (!response.ok) {
+                console.error('OneNet Studio set-device-property HTTP Error:', response.status);
+                return false;
+            }
 
             const result = await response.json();
             
