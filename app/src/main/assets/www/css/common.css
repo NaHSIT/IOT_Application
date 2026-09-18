@@ -292,7 +292,8 @@ textarea.input { resize: vertical; }
     opacity: 0; transition: opacity 0.2s ease;
 }
 .modal-mask.hidden { display: none; }
-.modal-mask.show { opacity: 1; }
+.modal-mask.show { opacity: 1; pointer-events: auto; }
+.modal-mask:not(.show) { pointer-events: none; }
 .modal-card {
     display: flex; flex-direction: column;
     width: 85%; max-width: 320px; max-height: 82vh;

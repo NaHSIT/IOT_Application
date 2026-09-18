@@ -116,7 +116,7 @@ npx serve
 ## 👨‍💻 作者与许可
 
 *   **Author:** 硫氢化钠 (NaHS)
-*   **Email:** liuqingla2005@163.com
+*   **Email:** nahs.lql@outlook.com
 *   **Bilibili:** [B站主页](https://space.bilibili.com/549713964?spm_id_from=333.1007.0.0)
 
 **免责声明：** 本软件/系统及其附带文档（下称“本软件”）仅供学习、交流与参考使用。作者对因使用本软件而造成的任何直接或间接损失不承担任何法律责任。

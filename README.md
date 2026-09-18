@@ -110,7 +110,7 @@ IOT/
 ## 👨‍💻 关于作者与声明
 
 - **作者**：硫氢化钠 (NaHS)
-- **邮箱**：[liuqingla2005@163.com](mailto:liuqingla2005@163.com)
+- **邮箱**：[nahs.lql@outlook.com](mailto:nahs.lql@outlook.com)
 - **B站主页**：[点击访问](https://space.bilibili.com/549713964?spm_id_from=333.1007.0.0)
 
 **🛡️ 免责声明**：

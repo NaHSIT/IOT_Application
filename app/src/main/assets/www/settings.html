@@ -157,10 +157,10 @@
                     <div class="cell-label text-sm text-sub">作者</div>
                     <span class="cell-value">硫氢化钠</span>
                 </div>
-                <a href="mailto:liuqingla2005@163.com" class="cell">
+                <a href="mailto:nahs.lql@outlook.com" class="cell">
                     <i class="fas fa-envelope text-tip w-4 text-center text-sm"></i>
                     <div class="cell-label text-sm text-sub">邮箱</div>
-                    <span class="cell-value text-accent">liuqingla2005@163.com</span>
+                    <span class="cell-value text-accent">nahs.lql@outlook.com</span>
                 </a>
                 <a href="https://space.bilibili.com/549713964?spm_id_from=333.1007.0.0" target="_blank" class="cell">
                     <i class="fab fa-bilibili text-tip w-4 text-center text-sm"></i>
@@ -420,9 +420,7 @@
 
             const modal = document.getElementById('confirmModal');
             modal.classList.remove('hidden');
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                modal.classList.add('show');
-            }));
+            setTimeout(() => modal.classList.add('show'), 30);
         }
 
         function closeConfirmModal() {
@@ -791,9 +789,7 @@
         function showModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.remove('hidden');
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                modal.classList.add('show');
-            }));
+            setTimeout(() => modal.classList.add('show'), 30);
         }
 
         function hideModal(modalId) {

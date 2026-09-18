@@ -207,9 +207,7 @@
 
             const modal = document.getElementById('confirmModal');
             modal.classList.remove('hidden');
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                modal.classList.add('show');
-            }));
+            setTimeout(() => modal.classList.add('show'), 30);
         }
 
         function closeConfirmModal() {
