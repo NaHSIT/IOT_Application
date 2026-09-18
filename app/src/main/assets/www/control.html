@@ -3,117 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f6f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
     <title>机房监控系统 - 设备控制</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="js/config.js"></script>
     <script src="js/onenet.js"></script>
     <style>
-        body { background-color: #f4f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .card { background-color: white; border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        
-        .toggle-label {
-            transition: background-color 0.3s ease;
-            position: relative;
-        }
-        .toggle-label:after {
-            content: "";
-            position: absolute;
-            top: 0.2rem;
-            left: 0.2rem;
-            width: 1.4rem;
-            height: 1.4rem;
-            background-color: white;
-            border-radius: 9999px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-        }
-        .toggle-checkbox:checked + .toggle-label:after {
-            transform: translateX(1.4rem);
-        }
-        
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
-        .h-safe { height: env(safe-area-inset-bottom, 20px); }
+        .input-inline { width: 88px; padding: 7px 8px; font-size: 13px; text-align: center; border-radius: 9px; }
+        .input-inline-text { width: 110px; text-align: left; }
+        .log-time { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     </style>
 </head>
-<body class="pb-[6.5rem]">
+<body class="pb-nav">
     <!-- Header -->
-    <header class="bg-white px-5 pt-[3.25rem] pb-4 flex items-center justify-between z-10 relative border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-b-[2rem]">
-        <a href="index.html" class="text-gray-400 w-8 h-8 flex items-center justify-center -ml-2 active:bg-gray-100 rounded-full transition">
-            <i class="fas fa-chevron-left text-[1.1rem]"></i>
+    <header class="subheader">
+        <a href="index.html" class="subheader-back">
+            <i class="fas fa-chevron-left"></i>
         </a>
-        <h1 class="text-[1.2rem] font-bold text-gray-900 tracking-tight">设备远程控制</h1>
-        <div class="flex items-center mt-1">
-            <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
-            <span class="text-green-500 text-[11px] font-bold tracking-wide">设备在线</span>
+        <h1 class="subheader-title">设备远程控制</h1>
+        <div class="subheader-side">
+            <div class="flex items-center gap-1.5">
+                <span class="dot dot-ok"></span>
+                <span class="text-ok" style="font-size: 11px;">设备在线</span>
+            </div>
         </div>
     </header>
 
-    <main class="px-5 py-6 space-y-[1.4rem]">
-        
+    <main class="px-5 py-5 flex flex-col gap-5">
+
         <!-- Dynamic Control Cards -->
-        <div id="controlsContainer" class="space-y-[1.4rem]"></div>
+        <div id="controlsContainer" class="flex flex-col gap-4"></div>
 
         <!-- History Section -->
         <div>
-            <div class="flex justify-between items-center mb-3.5 px-1">
-                <h3 class="font-bold text-gray-900 text-[13px] tracking-wide">最近操作记录</h3>
-                <button onclick="clearLogs()" class="text-gray-400 active:text-gray-600 transition p-1">
-                    <i class="fas fa-trash-alt text-[13px]"></i>
+            <div class="flex justify-between items-center mb-3 px-1">
+                <h3 class="text-sm font-medium">最近操作记录</h3>
+                <button onclick="clearLogs()" class="text-tip px-1">
+                    <i class="fas fa-trash-alt text-sm"></i>
                 </button>
             </div>
-            <div class="space-y-3" id="operationLogs">
+            <div class="flex flex-col gap-3" id="operationLogs">
                 <!-- Logs will be generated here -->
             </div>
         </div>
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <a href="index.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">首页</span>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
         </a>
-        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">监测</span>
+        <a href="monitoring.html" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>监测</span>
         </a>
-        <a href="video.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-video text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">视频</span>
+        <a href="video.html" class="nav-item">
+            <i class="fas fa-video"></i>
+            <span>视频</span>
         </a>
-        <a href="control.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-blue-500 relative">
-            <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">控制</span>
+        <a href="control.html" class="nav-item active">
+            <i class="fas fa-sliders-h"></i>
+            <span>控制</span>
         </a>
-        <a href="settings.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="far fa-user text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">我的</span>
+        <a href="settings.html" class="nav-item">
+            <i class="far fa-user"></i>
+            <span>我的</span>
         </a>
-        <div class="h-safe w-full absolute bottom-0"></div>
     </nav>
 
     <!-- Custom Confirm Modal -->
-    <div id="confirmModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center px-6 opacity-0 transition-opacity duration-200">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform scale-95 transition-transform duration-200">
-            <h3 class="text-[1.1rem] font-bold text-gray-900 mb-2">清空操作记录</h3>
-            <p class="text-[13px] text-gray-500 mb-6 leading-relaxed">确定要清空所有操作记录吗？此操作无法恢复。</p>
-            <div class="flex space-x-3">
-                <button onclick="closeConfirmModal()" class="flex-1 py-3 text-[14px] font-bold text-gray-600 bg-gray-100 active:bg-gray-200 rounded-xl transition">取消</button>
-                <button onclick="executeClearLogs()" class="flex-1 py-3 text-[14px] font-bold text-white bg-red-500 active:bg-red-600 rounded-xl shadow-sm shadow-red-500/30 transition">确认清空</button>
+    <div id="confirmModal" class="modal-mask hidden">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <h3 class="modal-title mb-2">清空操作记录</h3>
+                <p class="text-sm text-sub">确定要清空所有操作记录吗？此操作无法恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeConfirmModal()" class="btn btn-ghost">取消</button>
+                <button onclick="executeClearLogs()" class="btn" style="background: var(--danger); color: #fff;">确认清空</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full text-xs font-bold tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-[100]">
+    <div id="toast" class="toast" style="top: auto; bottom: 96px;">
         操作成功
     </div>
 
     <script>
         const currentModel = getDataModel();
         const controls = currentModel.controls;
-        
+
         let operationLogs = JSON.parse(localStorage.getItem('iot_operation_logs') || '[]');
 
         function initUI() {
@@ -123,45 +106,43 @@
             controls.forEach(c => {
                 const colors = COLOR_CLASSES[c.color] || COLOR_CLASSES['slate'];
                 let controlUI = '';
-                
+
                 if (c.dataType === 'int32' || c.dataType === 'float' || c.dataType === 'double') {
                     controlUI = `
-                        <div class="flex items-center space-x-2">
-                            <input type="number" id="input-${c.id}" step="${c.step || 1}" class="w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-gray-800 text-[13px] text-center focus:outline-none focus:border-blue-500">
-                            <button onclick="handleNumericControl('${c.id}')" class="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[12px] font-bold active:bg-blue-600 transition shadow-sm shadow-blue-500/30">下发</button>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="input-${c.id}" step="${c.step || 1}" class="input input-inline">
+                            <button onclick="handleNumericControl('${c.id}')" class="btn btn-primary btn-sm">下发</button>
                         </div>
                     `;
                 } else if (c.dataType === 'string') {
                     controlUI = `
-                        <div class="flex items-center space-x-2">
-                            <input type="text" id="input-${c.id}" class="w-24 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
-                            <button onclick="handleStringControl('${c.id}')" class="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-[12px] font-bold active:bg-blue-600 transition shadow-sm shadow-blue-500/30">下发</button>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="input-${c.id}" class="input input-inline input-inline-text">
+                            <button onclick="handleStringControl('${c.id}')" class="btn btn-primary btn-sm">下发</button>
                         </div>
                     `;
                 } else {
                     // default bool
                     controlUI = `
-                        <div class="relative inline-block w-[3.2rem] h-[1.8rem] align-middle select-none">
-                            <input type="checkbox" id="toggle-${c.id}" class="toggle-checkbox absolute block w-0 h-0 opacity-0 pointer-events-none" onchange="handleControl('${c.id}')"/>
-                            <label for="toggle-${c.id}" class="toggle-label block overflow-hidden h-[1.8rem] rounded-full bg-gray-200 cursor-pointer transition-colors duration-300 relative"></label>
-                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-${c.id}" onchange="handleControl('${c.id}')"/>
+                            <span class="slider"></span>
+                        </label>
                     `;
                 }
 
                 container.innerHTML += `
-                    <div class="card p-6 flex flex-col relative overflow-hidden border border-gray-50/80">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="w-14 h-14 ${colors.bg} rounded-2xl flex items-center justify-center ${colors.text} mr-4 border ${colors.border}">
-                                    <i class="fas ${c.icon} text-[1.5rem]"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-[1.1rem] font-bold text-gray-900 tracking-tight">${c.name}</h2>
-                                    <p class="text-gray-400 text-[10px] font-bold mt-0.5 tracking-wide font-mono">${c.cloudKey}</p>
-                                </div>
+                    <div class="card p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3.5">
+                            <div class="tile ${colors.bg}" style="width: 48px; height: 48px; font-size: 20px;">
+                                <i class="fas ${c.icon}"></i>
                             </div>
-                            ${controlUI}
+                            <div>
+                                <h2 class="text-base font-medium">${c.name}</h2>
+                                <p class="text-tip text-xs mt-0.5 log-time">${c.cloudKey}</p>
+                            </div>
                         </div>
+                        ${controlUI}
                     </div>
                 `;
             });
@@ -170,10 +151,10 @@
         function renderLogs() {
             const container = document.getElementById('operationLogs');
             if (operationLogs.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-400 text-xs py-4">暂无操作记录</div>';
+                container.innerHTML = '<div class="text-center text-tip text-xs py-4">暂无操作记录</div>';
                 return;
             }
-            
+
             // Create a map of IDs to names
             const deviceNames = {};
             controls.forEach(c => deviceNames[c.id] = c.name);
@@ -186,21 +167,21 @@
                 } else {
                     title = `设置 ${deviceNames[log.device] || log.device} 为 ${log.status}`;
                 }
-                const iconColor = isTurnOn || typeof log.status !== 'boolean' ? 'blue' : 'green';
                 const iconClass = isTurnOn || typeof log.status !== 'boolean' ? 'fa-play ml-0.5' : 'fa-power-off';
-                
+                const tileClass = isTurnOn || typeof log.status !== 'boolean' ? 'tile-blue' : 'tile-green';
+
                 return `
-                <div class="card p-4.5 flex items-center justify-between border border-gray-50 shadow-sm hover:shadow-md transition active:scale-[0.98]">
-                    <div class="flex items-center">
-                        <div class="w-11 h-11 bg-${iconColor}-50 rounded-[0.85rem] flex items-center justify-center text-${iconColor}-500 mr-3.5 border border-${iconColor}-100/50">
-                            <i class="fas ${iconClass} text-[15px]"></i>
+                <div class="card px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="tile tile-sm ${tileClass}">
+                            <i class="fas ${iconClass}" style="font-size: 12px;"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-gray-900 text-[13px] tracking-wide">${title}</h4>
-                            <p class="text-[10px] text-gray-400 font-mono mt-1 font-medium">${log.time}</p>
+                            <h4 class="text-sm font-medium">${title}</h4>
+                            <p class="text-tip mt-0.5 log-time" style="font-size: 11px;">${log.time}</p>
                         </div>
                     </div>
-                    <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-100/50 tracking-wide">执行成功</span>
+                    <span class="tag tag-ok">执行成功</span>
                 </div>
                 `;
             }).join('');
@@ -209,32 +190,25 @@
         function addLog(device, status) {
             const now = new Date();
             const timeStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-            
+
             operationLogs.unshift({ device, status, time: timeStr });
             if (operationLogs.length > 20) operationLogs.pop();
             localStorage.setItem('iot_operation_logs', JSON.stringify(operationLogs));
             renderLogs();
         }
-        
+
         function clearLogs() {
             if (operationLogs.length === 0) return;
             const modal = document.getElementById('confirmModal');
-            const modalContent = modal.querySelector('div.bg-white');
-            
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10);
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                modal.classList.add('show');
+            }));
         }
-        
+
         function closeConfirmModal() {
             const modal = document.getElementById('confirmModal');
-            const modalContent = modal.querySelector('div.bg-white');
-            
-            modal.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
-            
+            modal.classList.remove('show');
             setTimeout(() => {
                 modal.classList.add('hidden');
             }, 200);
@@ -266,34 +240,21 @@
             await sendControlCommand(id, value);
         }
 
-        function updateToggleUI(elementId) {
-            const checkbox = document.getElementById(elementId);
-            if (!checkbox) return;
-            const label = checkbox.nextElementSibling;
-            if (checkbox.checked) {
-                label.classList.remove('bg-gray-200');
-                label.classList.add('bg-blue-500');
-            } else {
-                label.classList.remove('bg-blue-500');
-                label.classList.add('bg-gray-200');
-            }
-        }
+        // 开关的选中态由 CSS（input:checked + .slider）处理，这里保留空实现以兼容旧调用
+        function updateToggleUI(elementId) {}
 
         async function handleControl(id) {
             const checkbox = document.getElementById(`toggle-${id}`);
             if (!checkbox) return;
             const value = checkbox.checked;
-            
-            // Update UI immediately for responsiveness
-            updateToggleUI(`toggle-${id}`);
+
             checkbox.disabled = true;
-            
+
             const success = await sendControlCommand(id, value);
-            
+
             if (!success) {
                 // Only revert if sendControlCommand explicitly returned false (failed)
                 checkbox.checked = !value;
-                updateToggleUI(`toggle-${id}`);
             }
             checkbox.disabled = false;
         }
@@ -303,7 +264,7 @@
                 if (typeof OneNetService !== 'undefined') {
                     const params = {};
                     params[id] = value;
-                    
+
                     const success = await OneNetService.setProperty(params);
                     if (success) {
                         showToast('指令下发成功');
@@ -325,9 +286,9 @@
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.innerText = msg;
-            toast.classList.add('opacity-100');
+            toast.classList.add('show');
             setTimeout(() => {
-                toast.classList.remove('opacity-100');
+                toast.classList.remove('show');
             }, 2000);
         }
 
@@ -353,7 +314,6 @@
                                     const checkbox = document.getElementById(`toggle-${c.id}`);
                                     if (checkbox) {
                                         checkbox.checked = data[c.id] === true || data[c.id] === 1 || data[c.id] === 'true' || data[c.id] === '1';
-                                        updateToggleUI(`toggle-${c.id}`);
                                     }
                                 }
                             }
@@ -368,7 +328,7 @@
         window.onload = () => {
             initUI();
             renderLogs();
-            
+
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     const newModelStr = localStorage.getItem('iot_data_model');
@@ -391,7 +351,6 @@
                                 const checkbox = document.getElementById(`toggle-${c.id}`);
                                 if (checkbox) {
                                     checkbox.checked = data[c.id] === true || data[c.id] === 1 || data[c.id] === 'true' || data[c.id] === '1';
-                                    updateToggleUI(`toggle-${c.id}`);
                                 }
                             }
                         }
@@ -400,7 +359,7 @@
                     console.error('Parse cache error:', e);
                 }
             }
-            
+
             setTimeout(syncStatus, 500);
         };
     </script>
