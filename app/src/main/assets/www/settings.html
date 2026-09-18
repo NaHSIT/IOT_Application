@@ -776,7 +776,7 @@
             const id = document.getElementById('dmId').value.trim();
             
             if (!id || !/^[a-zA-Z0-9_]+$/.test(id)) {
-                alert('内部ID必须为英文字母、数字或下划线');
+                showToast('内部ID必须为英文字母、数字或下划线');
                 return;
             }
 
@@ -805,7 +805,7 @@
                 if (currentModel.sensors.find(d => d.id === id) || 
                     currentModel.controls.find(d => d.id === id) ||
                     (currentModel.videoData && currentModel.videoData.find(d => d.id === id))) {
-                    alert('ID已存在，请使用其他ID');
+                    showToast('ID已存在，请使用其他ID');
                     return;
                 }
                 list.push(device);
@@ -862,7 +862,7 @@
             const deviceName = document.getElementById('configDeviceName').value.trim();
             const token = document.getElementById('configToken').value.trim();
             
-            if (!productId || !deviceName || !token) { alert('请填写完整'); return; }
+            if (!productId || !deviceName || !token) { showToast('请填写完整的产品ID、设备名称和Token'); return; }
             
             localStorage.setItem('iot_onenet_config', JSON.stringify({ productId, deviceName, token }));
             // 清除旧的设备缓存和报警，避免串台
