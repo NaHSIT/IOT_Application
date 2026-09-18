@@ -53,6 +53,7 @@ class WebAppInterface(private val context: Context) {
     }
 }
 
+
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
 
