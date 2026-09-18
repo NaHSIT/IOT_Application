@@ -3,86 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f6f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
     <title>机房监控系统 - 报警记录</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="js/config.js"></script>
     <style>
-        body { background-color: #f4f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .card { background-color: white; border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
-        .h-safe { height: env(safe-area-inset-bottom, 20px); }
+        .filter-tabs {
+            display: flex; gap: 24px; padding: 0 20px;
+            background: var(--bg); border-bottom: 1px solid var(--border);
+        }
+        .filter-tabs .tab-btn {
+            padding: 12px 2px; font-size: 13px; color: var(--text-2);
+            border-bottom: 2px solid transparent; margin-bottom: -1px;
+        }
+        .filter-tabs .tab-btn.active {
+            color: var(--accent); border-bottom-color: var(--accent); font-weight: 500;
+        }
+        .alert-card { position: relative; overflow: hidden; }
+        .alert-card .bar {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+        }
+        .alert-time { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+        .read-alert { opacity: 0.55; }
     </style>
 </head>
-<body class="pb-[6.5rem]">
+<body class="pb-nav">
     <!-- Header -->
-    <header class="bg-white px-5 pt-[3.25rem] pb-4 flex items-center justify-between z-10 relative">
-        <a href="javascript:history.back()" class="text-gray-400 w-8 h-8 flex items-center justify-center -ml-2 active:bg-gray-100 rounded-full transition">
-            <i class="fas fa-chevron-left text-[1.1rem]"></i>
+    <header class="subheader">
+        <a href="javascript:history.back()" class="subheader-back">
+            <i class="fas fa-chevron-left"></i>
         </a>
-        <h1 class="text-[1.2rem] font-bold text-gray-900 tracking-tight">报警记录</h1>
-        <div class="flex items-center space-x-4">
-            <div class="text-gray-400 cursor-pointer active:opacity-70 transition" onclick="clearAllAlerts()">
-                <i class="fas fa-trash-alt text-[14px]"></i>
-            </div>
-            <div class="text-blue-500 cursor-pointer active:opacity-70 transition" onclick="markAllAsRead()">
-                <span class="text-[13px] font-bold tracking-wide">一键已读</span>
-            </div>
+        <h1 class="subheader-title">报警记录</h1>
+        <div class="subheader-side" style="gap: 16px;">
+            <button class="text-tip cursor-pointer" onclick="clearAllAlerts()">
+                <i class="fas fa-trash-alt text-sm"></i>
+            </button>
+            <button class="text-accent text-sm cursor-pointer" onclick="markAllAsRead()">一键已读</button>
         </div>
     </header>
 
     <!-- Status Tabs -->
-    <div class="bg-white px-5 flex space-x-6 border-b border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-b-[2rem]" id="statusTabs">
-        <button data-filter="all" class="tab-btn pb-3 border-b-2 border-blue-500 text-blue-500 font-bold px-1 transition text-[13px] tracking-wide">全部</button>
-        <button data-filter="unread" class="tab-btn pb-3 text-gray-400 font-bold px-1 hover:text-gray-600 transition text-[13px] tracking-wide border-b-2 border-transparent">未读</button>
-        <button data-filter="read" class="tab-btn pb-3 text-gray-400 font-bold px-1 hover:text-gray-600 transition text-[13px] tracking-wide border-b-2 border-transparent">已处理</button>
+    <div class="filter-tabs" id="statusTabs">
+        <button data-filter="all" class="tab-btn active">全部</button>
+        <button data-filter="unread" class="tab-btn">未读</button>
+        <button data-filter="read" class="tab-btn">已处理</button>
     </div>
 
-    <main class="px-5 py-5 space-y-4" id="alertsList">
+    <main class="px-5 py-5 flex flex-col gap-4" id="alertsList">
         <!-- 动态生成的报警列表 -->
     </main>
 
     <!-- Custom Confirm Modal -->
-    <div id="confirmModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center px-6 opacity-0 transition-opacity duration-200">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform scale-95 transition-transform duration-200">
-            <h3 class="text-[1.1rem] font-bold text-gray-900 mb-2">清空报警记录</h3>
-            <p class="text-[13px] text-gray-500 mb-6 leading-relaxed">确定要清空所有报警记录吗？此操作无法恢复。</p>
-            <div class="flex space-x-3">
-                <button onclick="closeConfirmModal()" class="flex-1 py-3 text-[14px] font-bold text-gray-600 bg-gray-100 active:bg-gray-200 rounded-xl transition">取消</button>
-                <button onclick="executeClearAll()" class="flex-1 py-3 text-[14px] font-bold text-white bg-red-500 active:bg-red-600 rounded-xl shadow-sm shadow-red-500/30 transition">确认清空</button>
+    <div id="confirmModal" class="modal-mask hidden">
+        <div class="modal-card">
+            <div class="modal-body">
+                <h3 class="modal-title mb-2">清空报警记录</h3>
+                <p class="text-sm text-sub">确定要清空所有报警记录吗？此操作无法恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeConfirmModal()" class="btn btn-ghost">取消</button>
+                <button onclick="executeClearAll()" class="btn" style="background: var(--danger); color: #fff;">确认清空</button>
             </div>
         </div>
     </div>
 
     <!-- Custom Toast -->
-    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full text-[13px] font-bold shadow-lg z-[110] transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+    <div id="toast" class="toast">
         <!-- Toast message -->
     </div>
 
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <a href="index.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">首页</span>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
         </a>
-        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">监测</span>
+        <a href="monitoring.html" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>监测</span>
         </a>
-        <a href="video.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-video text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">视频</span>
+        <a href="video.html" class="nav-item">
+            <i class="fas fa-video"></i>
+            <span>视频</span>
         </a>
-        <a href="control.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">控制</span>
+        <a href="control.html" class="nav-item">
+            <i class="fas fa-sliders-h"></i>
+            <span>控制</span>
         </a>
-        <a href="settings.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="far fa-user text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">我的</span>
+        <a href="settings.html" class="nav-item">
+            <i class="far fa-user"></i>
+            <span>我的</span>
         </a>
-        <div class="h-safe w-full absolute bottom-0"></div>
     </nav>
     <script>
         // 动态加载报警数据
@@ -102,12 +116,12 @@
 
             if (filteredData.length === 0) {
                 alertsList.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-                        <i class="fas fa-bell-slash text-[3rem] mb-4 opacity-20"></i>
-                        <span class="text-[13px] font-bold tracking-wide">暂无报警记录</span>
+                    <div class="flex flex-col items-center justify-center py-20 text-tip">
+                        <i class="fas fa-bell-slash text-3xl mb-4 opacity-30"></i>
+                        <span class="text-sm">暂无报警记录</span>
                     </div>
                 ` + (currentFilter !== 'read' ? `
-                    <button onclick="switchToReadTab()" class="w-full py-4.5 text-[13px] font-bold text-blue-500 bg-blue-50/80 hover:bg-blue-50 rounded-[1.1rem] mt-6 transition border border-blue-100/50 shadow-[0_2px_8px_rgba(59,130,246,0.05)] active:scale-[0.98]">
+                    <button onclick="switchToReadTab()" class="btn btn-ghost btn-block mt-4">
                         查看历史报警记录
                     </button>
                 ` : '');
@@ -117,7 +131,7 @@
             alertsList.innerHTML = filteredData.map(alert => {
                 const sensorConfig = currentModel.sensors.find(s => s.id === alert.type) || {};
                 let displayVal, displayThresh;
-                
+
                 if (sensorConfig.dataType === 'string' || sensorConfig.dataType === 'boolean') {
                     displayVal = String(alert.currentValue);
                     displayThresh = String(alert.threshold);
@@ -126,42 +140,45 @@
                     displayVal = parseFloat(alert.currentValue).toFixed(decimals);
                     displayThresh = parseFloat(alert.threshold).toFixed(decimals);
                 }
-                
+
+                const isRead = alert.status === 'unread' ? '' : 'read-alert';
+                const barColor = alert.isCritical ? 'var(--danger)' : 'var(--accent)';
+                const dotCls = alert.status === 'unread' ? (alert.isCritical ? 'dot-alarm' : 'dot-accent') : 'dot-off';
+                const valColor = alert.status === 'unread' ? (alert.isCritical ? 'var(--danger)' : 'var(--accent)') : 'var(--text-3)';
+
                 return `
-                <div class="card p-5 relative overflow-hidden border ${alert.status === 'unread' ? (alert.isCritical ? 'border-red-100/50 shadow-sm' : 'border-blue-100/50 shadow-sm') : 'border-gray-100/80 shadow-sm'}">
-                    ${alert.status === 'unread' ? `
-                        <div class="absolute left-0 top-0 bottom-0 w-1 ${alert.isCritical ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'}"></div>
-                    ` : ''}
-                    
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center">
-                            <span class="w-2.5 h-2.5 ${alert.status === 'unread' ? (alert.isCritical ? 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]' : 'bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.6)]') : 'bg-gray-300'} rounded-full mr-2.5"></span>
-                            <h3 class="font-bold ${alert.status === 'unread' ? 'text-gray-900' : 'text-gray-400'} text-[15px] tracking-tight">${alert.title}</h3>
+                <div class="card alert-card p-4 pl-5 ${isRead}">
+                    ${alert.status === 'unread' ? `<div class="bar" style="background: ${barColor};"></div>` : ''}
+
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="dot ${dotCls}"></span>
+                            <h3 class="text-base font-medium">${alert.title}</h3>
                         </div>
-                        <span class="text-[11px] font-bold text-gray-400 font-mono">${alert.time}</span>
+                        <span class="text-tip text-xs alert-time">${alert.time}</span>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 ${alert.status === 'unread' ? 'mb-5' : ''} ml-5">
+
+                    <div class="grid grid-cols-2 gap-4 ml-5 ${alert.status === 'unread' ? 'mb-4' : ''}">
                         <div>
-                            <div class="text-[11px] text-gray-400 font-bold tracking-wider mb-1">当前值</div>
-                            <div class="text-[1.1rem] font-bold ${alert.status === 'unread' ? (alert.isCritical ? 'text-red-500' : 'text-blue-500') : 'text-gray-400'}">${displayVal}<span class="text-[10px] ml-0.5">${alert.unit}</span></div>
+                            <div class="text-xs text-tip mb-1">当前值</div>
+                            <div class="text-base font-medium num" style="color: ${valColor};">${displayVal}<span class="text-xs ml-0.5" style="font-size: 10px;">${alert.unit}</span></div>
                         </div>
                         <div>
-                            <div class="text-[11px] text-gray-400 font-bold tracking-wider mb-1">阈值</div>
-                            <div class="text-[1.1rem] font-bold ${alert.status === 'unread' ? 'text-gray-800' : 'text-gray-400'}">${displayThresh}<span class="text-[10px] ml-0.5">${alert.unit}</span></div>
+                            <div class="text-xs text-tip mb-1">阈值</div>
+                            <div class="text-base font-medium num">${displayThresh}<span class="text-xs ml-0.5" style="font-size: 10px;">${alert.unit}</span></div>
                         </div>
                     </div>
 
                     ${alert.status === 'unread' ? `
-                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-50">
-                            <button onclick="ignoreAlert(${alert.id})" class="px-5 py-2 text-[11px] font-bold text-gray-500 bg-gray-50 active:bg-gray-100 rounded-xl transition">忽略</button>
-                            <button onclick="viewDetail('${alert.type}')" class="px-5 py-2 text-[11px] font-bold text-white bg-blue-500 active:bg-blue-600 rounded-xl shadow-sm shadow-blue-500/30 transition">查看详情</button>
+                        <div class="flex justify-end gap-3 pt-3 border-t mt-1">
+                            <button onclick="ignoreAlert(${alert.id})" class="btn btn-ghost btn-sm">忽略</button>
+                            <button onclick="viewDetail('${alert.type}')" class="btn btn-primary btn-sm">查看详情</button>
                         </div>
                     ` : ''}
                 </div>
             `;
             }).join('') + (currentFilter !== 'read' ? `
-                 <button onclick="switchToReadTab()" class="w-full py-4.5 text-[13px] font-bold text-blue-500 bg-blue-50/80 hover:bg-blue-50 rounded-[1.1rem] mt-6 transition border border-blue-100/50 shadow-[0_2px_8px_rgba(59,130,246,0.05)] active:scale-[0.98]">
+                 <button onclick="switchToReadTab()" class="btn btn-ghost btn-block mt-2">
                      查看历史报警记录
                  </button>
              ` : '');
@@ -187,25 +204,17 @@
                 showToast('暂无报警记录可清空');
                 return;
             }
-            
+
             const modal = document.getElementById('confirmModal');
-            const modalContent = modal.querySelector('div.bg-white');
-            
             modal.classList.remove('hidden');
-            // Small delay to allow display:block to apply before animating opacity
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10);
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                modal.classList.add('show');
+            }));
         }
-        
+
         function closeConfirmModal() {
             const modal = document.getElementById('confirmModal');
-            const modalContent = modal.querySelector('div.bg-white');
-            
-            modal.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
-            
+            modal.classList.remove('show');
             setTimeout(() => {
                 modal.classList.add('hidden');
             }, 200);
@@ -213,34 +222,34 @@
 
         function executeClearAll() {
             closeConfirmModal();
-            
+
             alertsData = [];
             localStorage.removeItem('iot_alerts');
             localStorage.removeItem('iot_alarm_states'); // 同时重置状态，允许重新报警
-            
+
             // 清除首页缓存的旧数据，避免切换回去时再次闪烁出旧数据报警
             localStorage.removeItem('iot_latest_data');
-            
+
             // 立即隐藏横幅（如果它之前在首页触发过）
             const alertBanner = document.getElementById('alertBanner');
             if(alertBanner) alertBanner.style.display = 'none';
 
             renderAlerts();
-            
+
             setTimeout(() => {
                 showToast('已清空所有报警记录！');
             }, 200);
         }
-        
+
         let toastTimeout;
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
-            
+            toast.classList.add('show');
+
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+                toast.classList.remove('show');
             }, 2500);
         }
 
@@ -260,12 +269,8 @@
         tabBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 // Update tabs styling
-                tabBtns.forEach(b => {
-                    b.classList.remove('border-blue-500', 'text-blue-500');
-                    b.classList.add('text-gray-400', 'border-transparent');
-                });
-                this.classList.add('border-blue-500', 'text-blue-500');
-                this.classList.remove('text-gray-400', 'border-transparent');
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
 
                 currentFilter = this.dataset.filter;
                 renderAlerts();
