@@ -207,7 +207,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 /* ============ 6. 按钮 ============ */
 .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 11px 16px; border-radius: 12px;
+    padding: 11px 16px; border-radius: 12px; white-space: nowrap;
     font-size: 14px; font-weight: 500; line-height: 1.4;
     transition: transform 0.12s ease, opacity 0.12s ease;
 }
@@ -653,6 +653,7 @@ textarea.input { resize: vertical; }
 .col-span-2 { grid-column: span 2 / span 2; }
 .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
 /* 间距 gap */
 .gap-1 { gap: 4px; } .gap-1\.5 { gap: 6px; } .gap-2 { gap: 8px; } .gap-2\.5 { gap: 10px; }

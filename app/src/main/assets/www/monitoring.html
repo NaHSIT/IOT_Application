@@ -13,7 +13,6 @@
     <script src="js/onenet.js"></script>
     <style>
         .trend-wrap { height: 224px; transition: opacity 0.25s ease; cursor: pointer; }
-        .sensor-row { display: block; }
     </style>
 </head>
 <body class="pb-nav">
@@ -104,7 +103,7 @@
 
                 // Card
                 container.innerHTML += `
-                    <a href="history.html?metric=${s.id}" class="card px-5 py-4 flex justify-between items-center sensor-row pressable">
+                    <a href="history.html?metric=${s.id}" class="card px-5 py-4 flex justify-between items-center pressable">
                         <div>
                             <div class="text-xs text-tip mb-1">${s.name}</div>
                             <div class="flex items-baseline">
