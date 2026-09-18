@@ -3,77 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f6f7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
     <title>机房监控系统 - 系统设置</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="js/config.js"></script>
     <style>
-        body { background-color: #f4f7fb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .card { background-color: white; border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        
-        .toggle-label {
-            transition: background-color 0.3s ease;
-            position: relative;
+        .avatar {
+            width: 60px; height: 60px; border-radius: 14px; overflow: hidden;
+            background: var(--card-2); flex-shrink: 0;
         }
-        .toggle-label:after {
-            content: "";
-            position: absolute;
-            top: 0.2rem;
-            left: 0.2rem;
-            width: 1.4rem;
-            height: 1.4rem;
-            background-color: white;
-            border-radius: 9999px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+        .input-sm { padding: 9px 12px; font-size: 13px; border-radius: 10px; }
+        .icon-option {
+            display: flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px; border-radius: 9px; cursor: pointer;
+            color: var(--text-2); font-size: 17px;
         }
-        .toggle-checkbox:checked + .toggle-label:after {
-            transform: translateX(1.4rem);
+        .icon-option.selected {
+            background: var(--accent-weak); color: var(--accent);
         }
-        
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
-        .h-safe { height: env(safe-area-inset-bottom, 20px); }
-        
-        .modal-enter { opacity: 0; transform: scale(0.95); }
-        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms, transform 200ms; }
+        .type-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 10px; padding: 1px 6px; border-radius: 5px; line-height: 16px;
+        }
     </style>
 </head>
-<body class="pb-[6.5rem]">
+<body class="pb-nav">
     <!-- Header/Profile -->
-    <header class="bg-white px-5 pt-[3.5rem] pb-8 flex items-center border-b border-gray-100 mb-5 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-b-[2rem] z-10 relative">
-        <div class="w-[4.8rem] h-[4.8rem] rounded-[1.25rem] bg-gray-100 mr-4 overflow-hidden border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex-shrink-0 relative">
-            <img src="img/avatar.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\'><rect width=\'100%\' height=\'100%\' fill=\'%23f3f4f6\'/><text x=\'50%\' y=\'50%\' font-family=\'sans-serif\' font-size=\'12px\' fill=\'%239ca3af\' text-anchor=\'middle\' dy=\'.3em\'>头像未找到</text></svg>'" class="w-full h-full object-cover" alt="Admin">
-        </div>
-        <div class="flex-1">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h1 class="text-[1.35rem] font-bold text-gray-900 tracking-tight">硫氢化钠</h1>
-                    <p class="text-gray-400 text-[11px] mt-0.5 font-bold tracking-wide">ID: NaHS</p>
-                </div>
-                <span class="bg-blue-50 text-blue-500 text-[10px] font-bold px-2 py-1 rounded-md border border-blue-100/50">超级权限</span>
+    <header class="page-header">
+        <div class="flex items-center gap-4">
+            <div class="avatar">
+                <img src="img/avatar.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\'><rect width=\'100%\' height=\'100%\' fill=\'%23f3f4f6\'/><text x=\'50%\' y=\'50%\' font-family=\'sans-serif\' font-size=\'12px\' fill=\'%239ca3af\' text-anchor=\'middle\' dy=\'.3em\'>头像未找到</text></svg>'" alt="Admin">
             </div>
-            <p class="text-gray-400 text-[10px] mt-2 font-bold tracking-wide flex items-center">
-                <i class="fas fa-clock mr-1"></i> 上次登录: 今天 <span id="loginTime">08:50</span>
-            </p>
+            <div class="flex-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-xl font-semibold">硫氢化钠</h1>
+                        <p class="text-tip text-xs mt-0.5">ID: NaHS</p>
+                    </div>
+                    <span class="tag chip-blue">超级权限</span>
+                </div>
+                <p class="text-tip text-xs mt-2 flex items-center gap-1.5">
+                    <i class="fas fa-clock" style="font-size: 11px;"></i> 上次登录: 今天 <span id="loginTime">08:50</span>
+                </p>
+            </div>
         </div>
     </header>
 
-    <main class="px-5 space-y-[1.4rem]">
-        
+    <main class="px-5 mt-5 flex flex-col gap-6">
+
         <!-- Dynamic Sensor & Device Management -->
         <section>
             <div class="flex justify-between items-center mb-2.5 px-1">
-                <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                    <i class="fas fa-microchip mr-1.5 text-[10px]"></i> 数据模型与阈值管理
+                <h3 class="list-title flex items-center gap-1.5" style="padding: 0;">
+                    <i class="fas fa-microchip" style="font-size: 11px;"></i> 数据模型与阈值管理
                 </h3>
-                <div class="flex space-x-2">
-                    <button onclick="openDeviceModal('sensor')" class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md active:bg-blue-100 transition"><i class="fas fa-plus"></i> 传感器</button>
-                    <button onclick="openDeviceModal('control')" class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md active:bg-emerald-100 transition"><i class="fas fa-plus"></i> 控制器</button>
-                    <button onclick="openDeviceModal('videoData')" class="text-[10px] font-bold text-purple-500 bg-purple-50 px-2 py-1 rounded-md active:bg-purple-100 transition"><i class="fas fa-video"></i> 视频数据</button>
+                <div class="flex gap-2">
+                    <button onclick="openDeviceModal('sensor')" class="btn btn-ghost btn-sm text-accent"><i class="fas fa-plus"></i> 传感器</button>
+                    <button onclick="openDeviceModal('control')" class="btn btn-ghost btn-sm text-accent"><i class="fas fa-plus"></i> 控制器</button>
+                    <button onclick="openDeviceModal('videoData')" class="btn btn-ghost btn-sm text-accent"><i class="fas fa-video"></i> 视频数据</button>
                 </div>
             </div>
-            <div class="card overflow-hidden border border-gray-50" id="deviceListContainer">
-                <div class="divide-y divide-gray-50/80" id="deviceList">
+            <div class="list" id="deviceListContainer">
+                <div id="deviceList">
                     <!-- JS Dynamically injected -->
                 </div>
             </div>
@@ -81,369 +76,316 @@
 
         <!-- Notification Settings -->
         <section>
-            <h3 class="px-1 text-[11px] font-bold text-gray-400 uppercase mb-2.5 tracking-widest flex items-center">
-                <i class="fas fa-bell mr-1.5 text-[10px]"></i> 警报与通知
-            </h3>
-            <div class="card overflow-hidden border border-gray-50">
-                <div class="divide-y divide-gray-50/80">
-                    <div class="px-5 py-4.5 flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="w-7 h-7 rounded-lg bg-yellow-50 flex items-center justify-center mr-3">
-                                <i class="fas fa-volume-up text-yellow-500 text-[13px]"></i>
-                            </div>
-                            <div>
-                                <div class="text-[14px] font-bold text-gray-800 tracking-wide">异常声音警报</div>
-                            </div>
+            <h3 class="list-title flex items-center gap-1.5"><i class="fas fa-bell" style="font-size: 11px;"></i> 警报与通知</h3>
+            <div class="list">
+                <div class="cell">
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="tile tile-sm" style="background: var(--warn-bg); color: var(--warn);">
+                            <i class="fas fa-volume-up text-xs"></i>
                         </div>
-                        <div class="relative inline-block w-[3.2rem] h-[1.8rem] align-middle select-none">
-                            <input type="checkbox" name="toggle-sound" id="toggle-sound" checked class="toggle-checkbox absolute block w-0 h-0 opacity-0 pointer-events-none"/>
-                            <label for="toggle-sound" class="toggle-label block overflow-hidden h-[1.8rem] rounded-full bg-blue-500 cursor-pointer transition-colors duration-300 relative"></label>
-                        </div>
+                        <div class="text-sm">异常声音警报</div>
                     </div>
+                    <label class="switch">
+                        <input type="checkbox" name="toggle-sound" id="toggle-sound" checked>
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
         </section>
 
         <!-- System & Cloud Platform -->
         <section>
-            <h3 class="px-1 text-[11px] font-bold text-gray-400 uppercase mb-2.5 tracking-widest flex items-center">
-                <i class="fas fa-cog mr-1.5 text-[10px]"></i> 系统与云平台
-            </h3>
-            <div class="card overflow-hidden border border-gray-50">
-                <div class="divide-y divide-gray-50/80">
-                    <div class="px-5 py-4.5">
-                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5">系统名称</label>
-                        <p class="text-[10px] text-gray-400 mb-1.5">用于首页顶部展示，建议填写项目或机房名称，方便区分多套系统。</p>
-                        <div class="flex items-center space-x-2">
-                            <input type="text" id="dashboardTitleInput" placeholder="OneNet物联网后台" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-bold focus:outline-none focus:border-blue-500">
-                            <button onclick="saveDashboardTitle()" class="px-4 py-2 text-[12px] font-bold text-white bg-blue-500 rounded-lg active:bg-blue-600 transition shadow-sm">保存</button>
-                        </div>
+            <h3 class="list-title flex items-center gap-1.5"><i class="fas fa-cog" style="font-size: 11px;"></i> 系统与云平台</h3>
+            <div class="list">
+                <div class="cell flex-col items-stretch gap-2" style="padding: 14px 16px;">
+                    <label class="form-label" style="margin: 0;">系统名称</label>
+                    <p class="text-xs text-tip">用于首页顶部展示，建议填写项目或机房名称，方便区分多套系统。</p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="dashboardTitleInput" placeholder="OneNet物联网后台" class="input input-sm flex-1">
+                        <button onclick="saveDashboardTitle()" class="btn btn-primary btn-sm">保存</button>
                     </div>
-                    
-                    <div class="px-5 py-4.5">
-                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5">视频流监控地址</label>
-                        <p class="text-[10px] text-gray-400 mb-1.5">填写您部署的视频流地址，例如：http://192.168.1.100:8080/video</p>
-                        <div class="flex items-center space-x-2">
-                            <input type="url" id="videoUrlInput" placeholder="http://192.168.1.100:8080/video" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[12px] font-mono focus:outline-none focus:border-blue-500">
-                            <button onclick="saveVideoUrl()" class="px-4 py-2 text-[12px] font-bold text-white bg-blue-500 rounded-lg active:bg-blue-600 transition shadow-sm">保存</button>
-                        </div>
+                </div>
+
+                <div class="cell flex-col items-stretch gap-2" style="padding: 14px 16px;">
+                    <label class="form-label" style="margin: 0;">视频流监控地址</label>
+                    <p class="text-xs text-tip">填写您部署的视频流地址，例如：http://192.168.1.100:8080/video</p>
+                    <div class="flex items-center gap-2">
+                        <input type="url" id="videoUrlInput" placeholder="http://192.168.1.100:8080/video" class="input input-sm flex-1 mono">
+                        <button onclick="saveVideoUrl()" class="btn btn-primary btn-sm">保存</button>
                     </div>
-                    <div class="px-5 py-4.5">
-                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5">视频页面标题</label>
-                        <p class="text-[10px] text-gray-400 mb-1.5">自定义视频监控页面的顶部标题展示内容。</p>
-                        <div class="flex items-center space-x-2">
-                            <input type="text" id="videoTitleInput" placeholder="实时监控" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-bold focus:outline-none focus:border-blue-500">
-                            <button onclick="saveVideoTitle()" class="px-4 py-2 text-[12px] font-bold text-white bg-blue-500 rounded-lg active:bg-blue-600 transition shadow-sm">保存</button>
-                        </div>
+                </div>
+                <div class="cell flex-col items-stretch gap-2" style="padding: 14px 16px;">
+                    <label class="form-label" style="margin: 0;">视频页面标题</label>
+                    <p class="text-xs text-tip">自定义视频监控页面的顶部标题展示内容。</p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="videoTitleInput" placeholder="实时监控" class="input input-sm flex-1">
+                        <button onclick="saveVideoTitle()" class="btn btn-primary btn-sm">保存</button>
                     </div>
-                    <div class="px-5 py-4.5 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="openOneNetConfigModal()">
-                        <div class="flex items-center justify-between w-full">
-                            <div class="flex items-center">
-                                <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center mr-3">
-                                    <i class="fas fa-cloud text-indigo-500 text-[13px]"></i>
-                                </div>
-                                <div>
-                                    <span class="block text-[14px] font-bold text-gray-800 tracking-wide">OneNet 平台配置</span>
-                                    <span id="onenetStatusText" class="block text-[11px] text-gray-400 mt-0.5">未配置，点击后按提示填写即可连接云平台</span>
-                                </div>
-                            </div>
-                            <i class="fas fa-chevron-right text-gray-300 text-[10px] ml-3 flex-shrink-0"></i>
-                        </div>
+                </div>
+                <div class="cell cursor-pointer" onclick="openOneNetConfigModal()">
+                    <div class="tile tile-sm" style="background: var(--accent-weak); color: var(--accent);">
+                        <i class="fas fa-cloud text-xs"></i>
                     </div>
-                    <div class="px-5 py-4.5 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="clearCache()">
-                        <div class="flex items-center">
-                            <div class="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center mr-3">
-                                <i class="fas fa-trash-alt text-gray-400 text-[13px]"></i>
-                            </div>
-                            <div>
-                                <span class="block text-[14px] font-bold text-gray-800 tracking-wide">恢复默认/清除缓存</span>
-                                <span class="block text-[11px] text-gray-400 mt-0.5">清除本机数据模型、历史记录等缓存，用于更换设备或排查问题。</span>
-                            </div>
-                        </div>
-                        <i class="fas fa-chevron-right text-gray-300 text-[10px]"></i>
+                    <div class="cell-label">
+                        <span class="block text-sm">OneNet 平台配置</span>
+                        <span id="onenetStatusText" class="block text-xs text-tip mt-0.5">未配置，点击后按提示填写即可连接云平台</span>
                     </div>
+                    <i class="fas fa-chevron-right chevron"></i>
+                </div>
+                <div class="cell cursor-pointer" onclick="clearCache()">
+                    <div class="tile tile-sm bg-muted text-tip">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </div>
+                    <div class="cell-label">
+                        <span class="block text-sm">恢复默认/清除缓存</span>
+                        <span class="block text-xs text-tip mt-0.5">清除本机数据模型、历史记录等缓存，用于更换设备或排查问题。</span>
+                    </div>
+                    <i class="fas fa-chevron-right chevron"></i>
                 </div>
             </div>
         </section>
 
         <!-- Author Info -->
         <section>
-            <h3 class="px-1 text-[11px] font-bold text-gray-400 uppercase mb-2.5 tracking-widest flex items-center">
-                <i class="fas fa-info-circle mr-1.5 text-[10px]"></i> 关于
-            </h3>
-            <div class="card overflow-hidden border border-gray-50">
-                <div class="px-5 py-5 bg-white flex flex-col items-center justify-center space-y-3">
-                    <div class="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center text-teal-500 mb-1">
-                        <i class="fas fa-code text-2xl"></i>
+            <h3 class="list-title flex items-center gap-1.5"><i class="fas fa-info-circle" style="font-size: 11px;"></i> 关于</h3>
+            <div class="list">
+                <div class="cell">
+                    <div class="cell-label text-sm font-medium text-center">硫氢化钠开源物联网工具</div>
+                </div>
+                <div class="cell">
+                    <i class="fas fa-user-edit text-tip w-4 text-center text-sm"></i>
+                    <div class="cell-label text-sm text-sub">作者</div>
+                    <span class="cell-value">硫氢化钠</span>
+                </div>
+                <a href="mailto:liuqingla2005@163.com" class="cell">
+                    <i class="fas fa-envelope text-tip w-4 text-center text-sm"></i>
+                    <div class="cell-label text-sm text-sub">邮箱</div>
+                    <span class="cell-value text-accent">liuqingla2005@163.com</span>
+                </a>
+                <a href="https://space.bilibili.com/549713964?spm_id_from=333.1007.0.0" target="_blank" class="cell">
+                    <i class="fab fa-bilibili text-tip w-4 text-center text-sm"></i>
+                    <div class="cell-label text-sm text-sub">B站主页</div>
+                    <div class="cell-value text-accent flex items-center gap-1">
+                        点击访问 <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
                     </div>
-                    <h4 class="text-[14px] font-bold text-gray-900 tracking-tight">硫氢化钠开源物联网工具</h4>
-                    
-                    <div class="w-full space-y-2 mt-2">
-                        <div class="flex items-center justify-between bg-gray-50/80 p-3 rounded-xl">
-                            <div class="flex items-center text-gray-500">
-                                <i class="fas fa-user-edit w-5 text-center text-[13px]"></i>
-                                <span class="text-[12px] font-bold ml-1.5">作者</span>
-                            </div>
-                            <span class="text-[12px] font-bold text-gray-700">硫氢化钠</span>
-                        </div>
-                        
-                        <a href="mailto:liuqingla2005@163.com" class="flex items-center justify-between bg-gray-50/80 p-3 rounded-xl active:bg-gray-100 transition">
-                            <div class="flex items-center text-gray-500">
-                                <i class="fas fa-envelope w-5 text-center text-[13px]"></i>
-                                <span class="text-[12px] font-bold ml-1.5">邮箱</span>
-                            </div>
-                            <span class="text-[12px] font-bold text-blue-500">liuqingla2005@163.com</span>
-                        </a>
-                        
-                        <a href="https://space.bilibili.com/549713964?spm_id_from=333.1007.0.0" target="_blank" class="flex items-center justify-between bg-gray-50/80 p-3 rounded-xl active:bg-gray-100 transition">
-                            <div class="flex items-center text-gray-500">
-                                <i class="fab fa-bilibili w-5 text-center text-[13px]"></i>
-                                <span class="text-[12px] font-bold ml-1.5">B站主页</span>
-                            </div>
-                            <div class="flex items-center text-pink-400">
-                                <span class="text-[12px] font-bold mr-1">点击访问</span>
-                                <i class="fas fa-external-link-alt text-[10px]"></i>
-                            </div>
-                        </a>
-                    </div>
-                    
-                    <div class="w-full mt-1.5 p-3 bg-amber-50/50 rounded-xl border border-amber-100/50">
-                        <p class="text-[10px] text-amber-600/80 font-bold leading-relaxed tracking-wide text-justify">
-                            <i class="fas fa-shield-alt mr-1"></i>
-                            免责声明：本软件为开源工具，仅供学习参考使用，不承担任何因使用引起的直接或间接责任。
-                        </p>
-                    </div>
+                </a>
+                <div class="cell" style="background: var(--warn-bg);">
+                    <p class="text-xs" style="color: var(--warn); line-height: 1.7;">
+                        <i class="fas fa-shield-alt mr-1"></i>
+                        免责声明：本软件为开源工具，仅供学习参考使用，不承担任何因使用引起的直接或间接责任。
+                    </p>
                 </div>
             </div>
         </section>
 
-        <button onclick="logout()" class="w-full py-4 text-[15px] font-bold text-red-500 bg-white rounded-[1.25rem] shadow-[0_4px_10px_rgba(0,0,0,0.02)] border border-red-50 mb-8 active:scale-[0.98] active:bg-red-50 transition tracking-widest flex justify-center items-center">
+        <button onclick="logout()" class="btn btn-danger btn-block mb-8">
             <i class="fas fa-sign-out-alt mr-2"></i> 退出登录
         </button>
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <a href="index.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">首页</span>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>首页</span>
         </a>
-        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">监测</span>
+        <a href="monitoring.html" class="nav-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>监测</span>
         </a>
-        <a href="video.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-video text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">视频</span>
+        <a href="video.html" class="nav-item">
+            <i class="fas fa-video"></i>
+            <span>视频</span>
         </a>
-        <a href="control.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
-            <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">控制</span>
+        <a href="control.html" class="nav-item">
+            <i class="fas fa-sliders-h"></i>
+            <span>控制</span>
         </a>
-        <a href="settings.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-blue-500 relative">
-            <i class="fas fa-user text-[1.25rem] mb-0.5"></i>
-            <span class="text-[10px] font-bold tracking-wide">我的</span>
+        <a href="settings.html" class="nav-item active">
+            <i class="fas fa-user"></i>
+            <span>我的</span>
         </a>
-        <div class="h-safe w-full absolute bottom-0"></div>
     </nav>
 
     <!-- Device Modal -->
-    <div id="deviceModal" class="fixed inset-0 z-[100] hidden items-center justify-center">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity opacity-0" id="dmBackdrop" onclick="closeDeviceModal()"></div>
-        <div class="bg-white rounded-2xl w-[90%] max-w-[340px] max-h-[85vh] flex flex-col shadow-2xl z-10 transform scale-95 opacity-0 transition-all duration-200" id="dmContent">
-            <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+    <div id="deviceModal" class="modal-mask hidden">
+        <div class="modal-card relative z-10" style="width: 90%; max-width: 340px; max-height: 85vh;" onclick="event.stopPropagation()">
+            <div class="modal-header" style="justify-content: space-between;">
                 <div>
-                    <h3 id="dmTitle" class="text-[1.1rem] font-bold text-gray-900 tracking-tight">添加设备</h3>
-                    <p id="dmSubtitle" class="text-[10px] text-gray-400 font-bold tracking-wide mt-0.5">自定义数据模型与标识符</p>
+                    <h3 id="dmTitle" class="modal-title">添加设备</h3>
+                    <p id="dmSubtitle" class="modal-sub">自定义数据模型与标识符</p>
                 </div>
-                <button id="dmDeleteBtn" class="hidden text-red-500 bg-red-50 w-8 h-8 rounded-full flex items-center justify-center" onclick="deleteCurrentDevice()">
-                    <i class="fas fa-trash-alt text-[12px]"></i>
+                <button id="dmDeleteBtn" class="hidden tile tile-sm" style="background: var(--danger-bg); color: var(--danger);" onclick="deleteCurrentDevice()">
+                    <i class="fas fa-trash-alt text-xs"></i>
                 </button>
             </div>
-            
-            <div class="p-5 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
+
+            <div class="p-5 overflow-y-auto flex-1 flex flex-col gap-4" style="max-height: 60vh;">
                 <input type="hidden" id="dmType">
                 <input type="hidden" id="dmOriginalId">
-                
+
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1">内部ID (唯一英文字母，如 co2)</label>
-                    <input type="text" id="dmId" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-mono focus:outline-none focus:border-blue-500">
+                    <label class="form-label">内部ID (唯一英文字母，如 co2)</label>
+                    <input type="text" id="dmId" class="input input-sm mono">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1">显示名称 (如 二氧化碳)</label>
-                    <input type="text" id="dmName" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                    <label class="form-label">显示名称 (如 二氧化碳)</label>
+                    <input type="text" id="dmName" class="input input-sm">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1">OneNet 云端标识符 (如 co2_value)</label>
-                    <input type="text" id="dmCloudKey" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-mono focus:outline-none focus:border-blue-500">
+                    <label class="form-label">OneNet 云端标识符 (如 co2_value)</label>
+                    <input type="text" id="dmCloudKey" class="input input-sm mono">
                 </div>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="col-span-2">
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 flex justify-between items-center">
-                            <span>选择图标</span>
-                            <span id="dmSelectedIconPreview" class="text-blue-500"><i class="fas fa-microchip"></i></span>
-                        </label>
-                        <input type="hidden" id="dmIcon" value="fa-microchip">
-                        <div id="dmIconPicker" class="grid grid-cols-6 gap-2 max-h-32 overflow-y-auto p-2.5 border border-gray-200 rounded-lg bg-gray-50/50 custom-scrollbar">
-                            <!-- JS Dynamically injected -->
-                        </div>
+
+                <div>
+                    <label class="form-label flex justify-between items-center">
+                        <span>选择图标</span>
+                        <span id="dmSelectedIconPreview" class="text-accent"><i class="fas fa-microchip"></i></span>
+                    </label>
+                    <input type="hidden" id="dmIcon" value="fa-microchip">
+                    <div id="dmIconPicker" class="grid grid-cols-6 gap-1.5 p-2.5 border rounded-lg bg-muted" style="max-height: 128px; overflow-y: auto; border-color: var(--border);">
+                        <!-- JS Dynamically injected -->
                     </div>
-                    <div class="col-span-2 relative">
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1">主题颜色</label>
-                        <div class="relative" id="dmColorSelectWrap">
-                            <input type="hidden" id="dmColor" value="blue">
-                            <div class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-gray-800 text-[13px] cursor-pointer flex items-center justify-between" onclick="toggleCustomDropdown('dmColorDropdown')">
-                                <span id="dmColorText">蓝色 (Blue)</span>
-                                <i class="fas fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" id="dmColorIcon"></i>
-                            </div>
-                            <div id="dmColorDropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] hidden overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
-                                <div class="max-h-48 overflow-y-auto custom-scrollbar">
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'blue', '蓝色 (Blue)', 'dmColorDropdown')">蓝色 (Blue)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'orange', '橙色 (Orange)', 'dmColorDropdown')">橙色 (Orange)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'red', '红色 (Red)', 'dmColorDropdown')">红色 (Red)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'green', '绿色 (Green)', 'dmColorDropdown')">绿色 (Green)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'slate', '灰色 (Slate)', 'dmColorDropdown')">灰色 (Slate)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'cyan', '青色 (Cyan)', 'dmColorDropdown')">青色 (Cyan)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'yellow', '黄色 (Yellow)', 'dmColorDropdown')">黄色 (Yellow)</div>
-                                </div>
+                </div>
+
+                <div>
+                    <label class="form-label">主题颜色</label>
+                    <div class="relative" id="dmColorSelectWrap">
+                        <input type="hidden" id="dmColor" value="blue">
+                        <div class="input input-sm flex items-center justify-between cursor-pointer" onclick="toggleCustomDropdown('dmColorDropdown')">
+                            <span id="dmColorText">蓝色 (Blue)</span>
+                            <i class="fas fa-chevron-down text-tip" style="font-size: 10px;" id="dmColorIcon"></i>
+                        </div>
+                        <div id="dmColorDropdown" class="menu-pop hidden">
+                            <div style="max-height: 192px; overflow-y: auto;">
+                                <div class="menu-item" onclick="selectCustomDropdown('dmColor', 'blue', '蓝色 (Blue)', 'dmColorDropdown')">蓝色 (Blue)</div>
+                                <div class="menu-item" onclick="selectCustomDropdown('dmColor', 'orange', '橙色 (Orange)', 'dmColorDropdown')">橙色 (Orange)</div>
+                                <div class="menu-item" onclick="selectCustomDropdown('dmColor', 'red', '红色 (Red)', 'dmColorDropdown')">红色 (Red)</div>
+                                <div class="menu-item" onclick="selectCustomDropdown('dmColor', 'green', '绿色 (Green)', 'dmColorDropdown')">绿色 (Green)</div>
+                                <div class="menu-item" onclick="selectCustomDropdown('dmColor', 'slate', '灰色 (Slate)', 'dmColorDropdown')">灰色 (Slate)</div>
+                                <div class="menu-item" onclick="selectCustomDropdown('dmColor', 'cyan', '青色 (Cyan)', 'dmColorDropdown')">青色 (Cyan)</div>
+                                <div class="menu-item" onclick="selectCustomDropdown('dmColor', 'yellow', '黄色 (Yellow)', 'dmColorDropdown')">黄色 (Yellow)</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 mt-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div class="relative">
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1">数据类型</label>
+                        <label class="form-label">数据类型</label>
                         <div class="relative" id="dmDataTypeSelectWrap">
                             <input type="hidden" id="dmDataType" value="int32">
-                            <div class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-gray-800 text-[13px] cursor-pointer flex items-center justify-between" onclick="toggleCustomDropdown('dmDataTypeDropdown')">
+                            <div class="input input-sm flex items-center justify-between cursor-pointer" onclick="toggleCustomDropdown('dmDataTypeDropdown')">
                                 <span id="dmDataTypeText">整数 (int32)</span>
-                                <i class="fas fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" id="dmDataTypeIcon"></i>
+                                <i class="fas fa-chevron-down text-tip" style="font-size: 10px;" id="dmDataTypeIcon"></i>
                             </div>
-                            <div id="dmDataTypeDropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] hidden overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
-                                <div class="max-h-48 overflow-y-auto custom-scrollbar">
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'int32', '整数 (int32)', 'dmDataTypeDropdown'); toggleStepInput();">整数 (int32)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'float', '浮点数 (float)', 'dmDataTypeDropdown'); toggleStepInput();">浮点数 (float)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'double', '双精度 (double)', 'dmDataTypeDropdown'); toggleStepInput();">双精度 (double)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'bool', '布尔 (bool)', 'dmDataTypeDropdown'); toggleStepInput();">布尔 (bool)</div>
-                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'string', '字符串 (string)', 'dmDataTypeDropdown'); toggleStepInput();">字符串 (string)</div>
+                            <div id="dmDataTypeDropdown" class="menu-pop hidden">
+                                <div style="max-height: 192px; overflow-y: auto;">
+                                    <div class="menu-item" onclick="selectCustomDropdown('dmDataType', 'int32', '整数 (int32)', 'dmDataTypeDropdown'); toggleStepInput();">整数 (int32)</div>
+                                    <div class="menu-item" onclick="selectCustomDropdown('dmDataType', 'float', '浮点数 (float)', 'dmDataTypeDropdown'); toggleStepInput();">浮点数 (float)</div>
+                                    <div class="menu-item" onclick="selectCustomDropdown('dmDataType', 'double', '双精度 (double)', 'dmDataTypeDropdown'); toggleStepInput();">双精度 (double)</div>
+                                    <div class="menu-item" onclick="selectCustomDropdown('dmDataType', 'bool', '布尔 (bool)', 'dmDataTypeDropdown'); toggleStepInput();">布尔 (bool)</div>
+                                    <div class="menu-item" onclick="selectCustomDropdown('dmDataType', 'string', '字符串 (string)', 'dmDataTypeDropdown'); toggleStepInput();">字符串 (string)</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1">步长</label>
-                        <input type="number" step="any" id="dmStep" placeholder="1" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                        <label class="form-label">步长</label>
+                        <input type="number" step="any" id="dmStep" placeholder="1" class="input input-sm">
                     </div>
                 </div>
 
-                <div id="dmSensorFields" class="hidden space-y-4 border-t border-gray-100 pt-4 mt-2">
+                <div id="dmSensorFields" class="hidden flex flex-col gap-4 border-t pt-4" style="border-color: var(--border);">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1">单位 (如 ppm, ℃, %)</label>
-                        <input type="text" id="dmUnit" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                        <label class="form-label">单位 (如 ppm, ℃, %)</label>
+                        <input type="text" id="dmUnit" class="input input-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[10px] font-bold text-blue-500 mb-1">下限阈值</label>
-                            <input type="number" id="dmMin" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
+                            <label class="form-label text-accent">下限阈值</label>
+                            <input type="number" id="dmMin" class="input input-sm">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-red-500 mb-1">上限阈值</label>
-                            <input type="number" id="dmMax" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-red-500">
+                            <label class="form-label text-danger">上限阈值</label>
+                            <input type="number" id="dmMax" class="input input-sm">
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="p-5 pt-3 border-t border-gray-100 flex space-x-3">
-                <button onclick="closeDeviceModal()" class="flex-1 py-2.5 rounded-xl font-bold text-[13px] text-gray-500 bg-gray-100 active:bg-gray-200 transition">取消</button>
-                <button onclick="saveDeviceModal()" class="flex-1 py-2.5 rounded-xl font-bold text-[13px] text-white bg-blue-500 active:bg-blue-600 transition shadow-[0_4px_10px_rgba(59,130,246,0.3)]">保存</button>
+
+            <div class="modal-footer" style="border-top: 1px solid var(--border);">
+                <button onclick="closeDeviceModal()" class="btn btn-ghost">取消</button>
+                <button onclick="saveDeviceModal()" class="btn btn-primary">保存</button>
             </div>
         </div>
     </div>
 
     <!-- OneNet Config Modal -->
-    <div class="fixed inset-0 flex items-center justify-center z-[100] hidden" id="onenetModal">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity opacity-0" id="onenetModalBackdrop" onclick="closeOneNetConfigModal()"></div>
-        <div class="bg-white rounded-2xl w-[90%] max-w-[340px] flex flex-col shadow-2xl z-10 transform scale-95 opacity-0 transition-all duration-200" id="onenetModalContent">
-            <div class="p-6 pb-4 border-b border-gray-100">
-                <h3 class="text-lg font-bold text-gray-900 mb-1 tracking-tight">OneNet 平台配置</h3>
-                <p class="text-[11px] text-gray-400 font-bold tracking-wide">在 OneNet 控制台创建产品与设备后，将以下信息完整复制到这里即可。</p>
+    <div class="modal-mask hidden" id="onenetModal">
+        <div class="modal-card relative z-10" style="width: 90%; max-width: 340px;">
+            <div class="modal-header" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                <h3 class="modal-title">OneNet 平台配置</h3>
+                <p class="modal-sub" style="line-height: 1.5;">在 OneNet 控制台创建产品与设备后，将以下信息完整复制到这里即可。</p>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-5 flex flex-col gap-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 mb-1.5">产品 ID (Product ID)</label>
-                    <p class="text-[10px] text-gray-400 mb-1">来自 OneNet 控制台“产品管理”页面，例如：abc123。</p>
-                    <input type="text" id="configProductId" placeholder="例如：abc123" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 text-[14px] focus:outline-none focus:border-indigo-500">
+                    <label class="form-label">产品 ID (Product ID)</label>
+                    <p class="text-xs text-tip mb-1.5">来自 OneNet 控制台“产品管理”页面，例如：abc123。</p>
+                    <input type="text" id="configProductId" placeholder="例如：abc123" class="input input-sm">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 mb-1.5">设备名称 (Device Name)</label>
-                    <p class="text-[10px] text-gray-400 mb-1">来自该产品下的“设备列表”，需要与云端设备名称保持一致。</p>
-                    <input type="text" id="configDeviceName" placeholder="例如：机房网关001" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 text-[14px] focus:outline-none focus:border-indigo-500">
+                    <label class="form-label">设备名称 (Device Name)</label>
+                    <p class="text-xs text-tip mb-1.5">来自该产品下的“设备列表”，需要与云端设备名称保持一致。</p>
+                    <input type="text" id="configDeviceName" placeholder="例如：机房网关001" class="input input-sm">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 mb-1.5">鉴权 Token (Authorization)</label>
-                    <p class="text-[10px] text-gray-400 mb-1">在设备详情页生成或复制完整 Token，包含签名与有效期信息。</p>
-                    <textarea id="configToken" rows="3" placeholder="粘贴从 OneNet 控制台复制的完整鉴权 Token" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-gray-800 text-[12px] font-mono focus:outline-none focus:border-indigo-500 break-all"></textarea>
+                    <label class="form-label">鉴权 Token (Authorization)</label>
+                    <p class="text-xs text-tip mb-1.5">在设备详情页生成或复制完整 Token，包含签名与有效期信息。</p>
+                    <textarea id="configToken" rows="3" placeholder="粘贴从 OneNet 控制台复制的完整鉴权 Token" class="input input-sm mono break-all"></textarea>
                 </div>
             </div>
-            <div class="p-6 pt-0 flex space-x-3">
-                <button onclick="closeOneNetConfigModal()" class="flex-1 py-3 rounded-xl font-bold text-[13px] text-gray-500 bg-gray-100 active:bg-gray-200 transition">取消</button>
-                <button onclick="saveOneNetConfigModal()" class="flex-1 py-3 rounded-xl font-bold text-[13px] text-white bg-indigo-500 active:bg-indigo-600 transition">保存并重启</button>
+            <div class="modal-footer">
+                <button onclick="closeOneNetConfigModal()" class="btn btn-ghost">取消</button>
+                <button onclick="saveOneNetConfigModal()" class="btn btn-primary">保存并重启</button>
             </div>
         </div>
     </div>
 
     <!-- Custom Confirm Modal -->
-    <div id="confirmModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center px-6 opacity-0 transition-opacity duration-200">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform scale-95 transition-transform duration-200" id="confirmModalContent">
-            <h3 class="text-[1.1rem] font-bold text-gray-900 mb-2" id="confirmTitle">确认操作</h3>
-            <p class="text-[13px] text-gray-500 mb-6 leading-relaxed" id="confirmMessage">确定要执行此操作吗？</p>
-            <div class="flex space-x-3">
-                <button onclick="closeConfirmModal()" class="flex-1 py-3 text-[14px] font-bold text-gray-600 bg-gray-100 active:bg-gray-200 rounded-xl transition">取消</button>
-                <button id="confirmExecuteBtn" class="flex-1 py-3 text-[14px] font-bold text-white bg-blue-500 active:bg-blue-600 rounded-xl shadow-sm transition">确定</button>
+    <div id="confirmModal" class="modal-mask hidden">
+        <div class="modal-card" id="confirmModalContent">
+            <div class="modal-body">
+                <h3 class="modal-title mb-2" id="confirmTitle">确认操作</h3>
+                <p class="text-sm text-sub" id="confirmMessage">确定要执行此操作吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeConfirmModal()" class="btn btn-ghost">取消</button>
+                <button id="confirmExecuteBtn" class="btn btn-primary">确定</button>
             </div>
         </div>
     </div>
 
     <!-- Toast -->
-    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2.5 rounded-full shadow-lg font-bold text-[12px] tracking-wide z-[110] transform -translate-y-10 opacity-0 transition-all duration-300 pointer-events-none">
-        <i class="fas fa-check-circle text-green-400 mr-1.5"></i> <span id="toastMsg">操作成功</span>
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle text-ok"></i> <span id="toastMsg">操作成功</span>
     </div>
 
     <script>
         let currentModel = getDataModel();
-        
+
         let confirmAction = null;
 
         // Custom Dropdown Logic
         function toggleCustomDropdown(dropdownId) {
             const dropdown = document.getElementById(dropdownId);
-            const icon = document.getElementById(dropdownId.replace('Dropdown', 'Icon'));
-            const isHidden = dropdown.classList.contains('hidden');
-            
+
             // Close all other dropdowns
             document.querySelectorAll('[id$="Dropdown"]').forEach(d => {
-                if(d.id !== dropdownId) {
-                    d.classList.add('opacity-0', 'scale-95');
-                    setTimeout(() => d.classList.add('hidden'), 200);
-                    const otherIcon = document.getElementById(d.id.replace('Dropdown', 'Icon'));
-                    if(otherIcon) otherIcon.classList.remove('rotate-180');
-                }
+                if (d.id !== dropdownId) d.classList.add('hidden');
             });
 
-            if (isHidden) {
-                dropdown.classList.remove('hidden');
-                setTimeout(() => {
-                    dropdown.classList.remove('opacity-0', 'scale-95');
-                    icon.classList.add('rotate-180');
-                }, 10);
-            } else {
-                dropdown.classList.add('opacity-0', 'scale-95');
-                icon.classList.remove('rotate-180');
-                setTimeout(() => dropdown.classList.add('hidden'), 200);
-            }
+            dropdown.classList.toggle('hidden');
         }
 
         function selectCustomDropdown(inputId, value, text, dropdownId) {
@@ -455,44 +397,37 @@
         // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#dmColorSelectWrap') && !e.target.closest('#dmDataTypeSelectWrap')) {
-                document.querySelectorAll('[id$="Dropdown"]').forEach(d => {
-                    if (!d.classList.contains('hidden')) {
-                        d.classList.add('opacity-0', 'scale-95');
-                        setTimeout(() => d.classList.add('hidden'), 200);
-                        const icon = document.getElementById(d.id.replace('Dropdown', 'Icon'));
-                        if(icon) icon.classList.remove('rotate-180');
-                    }
-                });
+                document.querySelectorAll('[id$="Dropdown"]').forEach(d => d.classList.add('hidden'));
             }
         });
 
-        function showConfirm(title, message, btnText, btnColorClass, action) {
+        function showConfirm(title, message, btnText, btnStyle, action) {
             document.getElementById('confirmTitle').innerText = title;
             document.getElementById('confirmMessage').innerText = message;
-            
+
             const execBtn = document.getElementById('confirmExecuteBtn');
             execBtn.innerText = btnText;
-            execBtn.className = `flex-1 py-3 text-[14px] font-bold text-white rounded-xl shadow-sm transition ${btnColorClass}`;
-            
+            execBtn.className = `btn ${btnStyle === 'danger' ? '' : 'btn-primary'}`;
+            if (btnStyle === 'danger') {
+                execBtn.style.background = 'var(--danger)';
+                execBtn.style.color = '#fff';
+            } else {
+                execBtn.style.background = '';
+                execBtn.style.color = '';
+            }
+
             confirmAction = action;
-            
+
             const modal = document.getElementById('confirmModal');
-            const modalContent = document.getElementById('confirmModalContent');
-            
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10);
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                modal.classList.add('show');
+            }));
         }
 
         function closeConfirmModal() {
             const modal = document.getElementById('confirmModal');
-            const modalContent = document.getElementById('confirmModalContent');
-            
-            modal.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
-            
+            modal.classList.remove('show');
             setTimeout(() => {
                 modal.classList.add('hidden');
                 confirmAction = null;
@@ -507,30 +442,29 @@
         function loadSettings() {
             renderDeviceList();
             renderIconPicker();
-            
+
             let config = JSON.parse(localStorage.getItem('iot_config') || '{}');
             const soundToggle = document.getElementById('toggle-sound');
             if (config.soundAlert !== undefined) soundToggle.checked = config.soundAlert;
-            updateToggleUI(soundToggle);
-            
+
             document.getElementById('dashboardTitleInput').value = localStorage.getItem('iot_dashboard_title') || 'OneNet物联网后台';
             document.getElementById('videoUrlInput').value = config.videoUrl || '';
             document.getElementById('videoTitleInput').value = localStorage.getItem('iot_video_title') || '实时监控';
-            
+
             const onenetConfig = JSON.parse(localStorage.getItem('iot_onenet_config') || 'null');
             const statusEl = document.getElementById('onenetStatusText');
             if (statusEl) {
                 if (onenetConfig && onenetConfig.productId && onenetConfig.deviceName) {
                     statusEl.innerText = `已绑定 ${onenetConfig.productId} / ${onenetConfig.deviceName}`;
-                    statusEl.classList.remove('text-gray-400');
-                    statusEl.classList.add('text-emerald-500');
+                    statusEl.classList.remove('text-tip');
+                    statusEl.classList.add('text-ok');
                 } else {
                     statusEl.innerText = '未配置，点击后按提示填写即可连接云平台';
-                    statusEl.classList.remove('text-emerald-500');
-                    statusEl.classList.add('text-gray-400');
+                    statusEl.classList.remove('text-ok');
+                    statusEl.classList.add('text-tip');
                 }
             }
-            
+
             const now = new Date();
             document.getElementById('loginTime').innerText = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
         }
@@ -570,19 +504,7 @@
             }
         }
 
-        function updateToggleUI(toggle) {
-            const label = toggle.nextElementSibling;
-            if (toggle.checked) {
-                label.classList.remove('bg-gray-200');
-                label.classList.add('bg-blue-500');
-            } else {
-                label.classList.remove('bg-blue-500');
-                label.classList.add('bg-gray-200');
-            }
-        }
-
         document.getElementById('toggle-sound').addEventListener('change', function() {
-            updateToggleUI(this);
             let config = JSON.parse(localStorage.getItem('iot_config') || '{}');
             config.soundAlert = this.checked;
             localStorage.setItem('iot_config', JSON.stringify(config));
@@ -592,24 +514,18 @@
         function renderIconPicker() {
             const picker = document.getElementById('dmIconPicker');
             picker.innerHTML = COMMON_ICONS.map(icon => `
-                <div class="icon-option flex items-center justify-center w-10 h-10 rounded-lg cursor-pointer text-gray-400 hover:bg-white hover:text-blue-500 hover:shadow-sm transition" data-icon="${icon}" onclick="selectIcon('${icon}')">
-                    <i class="fas ${icon} text-[1.2rem]"></i>
+                <div class="icon-option" data-icon="${icon}" onclick="selectIcon('${icon}')">
+                    <i class="fas ${icon}"></i>
                 </div>
             `).join('');
         }
-        
+
         function selectIcon(iconClass) {
             document.getElementById('dmIcon').value = iconClass;
             document.getElementById('dmSelectedIconPreview').innerHTML = `<i class="fas ${iconClass}"></i>`;
-            
+
             document.querySelectorAll('.icon-option').forEach(el => {
-                if (el.dataset.icon === iconClass) {
-                    el.classList.add('bg-white', 'text-blue-500', 'shadow-sm', 'ring-1', 'ring-blue-100');
-                    el.classList.remove('text-gray-400');
-                } else {
-                    el.classList.remove('bg-white', 'text-blue-500', 'shadow-sm', 'ring-1', 'ring-blue-100');
-                    el.classList.add('text-gray-400');
-                }
+                el.classList.toggle('selected', el.dataset.icon === iconClass);
             });
         }
 
@@ -617,60 +533,55 @@
         function renderDeviceList() {
             const container = document.getElementById('deviceList');
             container.innerHTML = '';
-            
+
             if (currentModel.sensors.length === 0 && currentModel.controls.length === 0 && (!currentModel.videoData || currentModel.videoData.length === 0)) {
                 container.innerHTML = `
                     <div class="px-5 py-8 text-center">
-                        <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-inbox text-gray-300 text-xl"></i>
+                        <div class="tile bg-muted text-tip mx-auto mb-3" style="width: 44px; height: 44px; font-size: 18px;">
+                            <i class="fas fa-inbox"></i>
                         </div>
-                        <p class="text-[12px] font-bold text-gray-400">暂无数据模型</p>
-                        <p class="text-[10px] text-gray-400 mt-1">点击右上角添加设备或附加数据</p>
+                        <p class="text-sm text-tip">暂无数据模型</p>
+                        <p class="text-xs text-tip mt-1">点击右上角添加设备或附加数据</p>
                     </div>
                 `;
                 return;
             }
 
             const appendItem = (item, type) => {
-                let badgeClass, badgeText, typeIcon, borderClass;
+                let badgeCls, badgeText, typeIcon;
                 if (type === 'sensor') {
-                    badgeClass = 'bg-blue-50 text-blue-500 border-blue-100/50';
+                    badgeCls = 'chip-blue';
                     badgeText = '传感器';
                     typeIcon = 'fa-satellite-dish';
-                    borderClass = 'border-l-4 border-l-blue-400';
                 } else if (type === 'control') {
-                    badgeClass = 'bg-emerald-50 text-emerald-500 border-emerald-100/50';
+                    badgeCls = 'chip-green';
                     badgeText = '控制器';
                     typeIcon = 'fa-sliders-h';
-                    borderClass = 'border-l-4 border-l-emerald-400';
                 } else if (type === 'videoData') {
-                    badgeClass = 'bg-purple-50 text-purple-500 border-purple-100/50';
+                    badgeCls = 'chip-purple';
                     badgeText = '视频数据';
                     typeIcon = 'fa-video';
-                    borderClass = 'border-l-4 border-l-purple-400';
                 }
 
                 const colors = COLOR_CLASSES[item.color] || COLOR_CLASSES['slate'];
-                
+
                 container.innerHTML += `
-                    <div class="px-5 py-4 flex items-center justify-between active:bg-gray-50 transition cursor-pointer ${borderClass}" onclick="editDevice('${type}', '${item.id}')">
-                        <div class="flex items-center">
-                            <div class="w-9 h-9 rounded-xl ${colors.bg} flex items-center justify-center mr-3.5 shadow-sm border ${colors.border}">
-                                <i class="fas ${item.icon} ${colors.text} text-[15px]"></i>
-                            </div>
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <h4 class="text-[14px] font-bold text-gray-800 tracking-wide">${item.name}</h4>
-                                    <span class="${badgeClass} text-[9px] font-bold px-1.5 py-0.5 rounded border flex items-center"><i class="fas ${typeIcon} mr-1 text-[8px]"></i>${badgeText}</span>
-                                </div>
-                                <p class="text-[10px] text-gray-400 mt-1 font-mono tracking-wider flex items-center">
-                                    <i class="fas fa-cloud text-gray-300 mr-1 text-[9px]"></i> ${item.cloudKey}
-                                    <span class="mx-1.5 text-gray-200">|</span>
-                                    <i class="fas fa-microchip text-gray-300 mr-1 text-[9px]"></i> ${item.id}
-                                </p>
-                            </div>
+                    <div class="cell cursor-pointer" onclick="editDevice('${type}', '${item.id}')">
+                        <div class="tile ${colors.bg}">
+                            <i class="fas ${item.icon}"></i>
                         </div>
-                        <i class="fas fa-edit text-gray-300 text-[12px]"></i>
+                        <div class="cell-label">
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-medium">${item.name}</h4>
+                                <span class="type-badge ${badgeCls}"><i class="fas ${typeIcon}" style="font-size: 8px;"></i>${badgeText}</span>
+                            </div>
+                            <p class="text-xs text-tip mt-1 mono flex items-center gap-1.5">
+                                <i class="fas fa-cloud" style="font-size: 9px;"></i> ${item.cloudKey}
+                                <span style="opacity: .4;">|</span>
+                                <i class="fas fa-microchip" style="font-size: 9px;"></i> ${item.id}
+                            </p>
+                        </div>
+                        <i class="fas fa-edit chevron"></i>
                     </div>
                 `;
             };
@@ -688,21 +599,21 @@
             document.getElementById('dmOriginalId').value = '';
             document.getElementById('dmTitle').innerText = type === 'sensor' ? '添加传感器' : type === 'control' ? '添加控制器' : '添加视频附加数据';
             document.getElementById('dmDeleteBtn').classList.add('hidden');
-            
+
             // Reset fields
             document.getElementById('dmId').value = '';
             document.getElementById('dmId').disabled = false;
             document.getElementById('dmName').value = '';
             document.getElementById('dmCloudKey').value = '';
-            
+
             // Reset custom dropdowns
             selectCustomDropdown('dmColor', 'blue', '蓝色 (Blue)', 'dmColorDropdown');
             selectCustomDropdown('dmDataType', type === 'sensor' || type === 'videoData' ? 'float' : 'bool', type === 'sensor' || type === 'videoData' ? '浮点数 (float)' : '布尔 (bool)', 'dmDataTypeDropdown');
-            
+
             selectIcon(type === 'sensor' ? 'fa-microchip' : type === 'control' ? 'fa-plug' : 'fa-users');
-            
+
             document.getElementById('dmStep').value = '1';
-            
+
             if (type === 'sensor' || type === 'videoData') {
                 document.getElementById('dmSensorFields').classList.remove('hidden');
                 document.getElementById('dmUnit').value = '';
@@ -711,9 +622,9 @@
             } else {
                 document.getElementById('dmSensorFields').classList.add('hidden');
             }
-            
+
             toggleStepInput();
-            showModal('deviceModal', 'dmBackdrop', 'dmContent');
+            showModal('deviceModal');
         }
 
         function editDevice(type, id) {
@@ -725,25 +636,25 @@
             document.getElementById('dmOriginalId').value = id;
             document.getElementById('dmTitle').innerText = '编辑设备';
             document.getElementById('dmDeleteBtn').classList.remove('hidden');
-            
+
             document.getElementById('dmId').value = device.id;
             document.getElementById('dmId').disabled = true; // Prevent changing ID of existing
             document.getElementById('dmName').value = device.name;
             document.getElementById('dmCloudKey').value = device.cloudKey;
             document.getElementById('dmIcon').value = device.icon;
-            
+
             // Set custom dropdowns
             const colorOptions = { 'blue': '蓝色 (Blue)', 'orange': '橙色 (Orange)', 'red': '红色 (Red)', 'green': '绿色 (Green)', 'slate': '灰色 (Slate)', 'cyan': '青色 (Cyan)', 'yellow': '黄色 (Yellow)' };
             selectCustomDropdown('dmColor', device.color || 'blue', colorOptions[device.color || 'blue'] || '蓝色 (Blue)', 'dmColorDropdown');
-            
+
             const typeOptions = { 'int32': '整数 (int32)', 'float': '浮点数 (float)', 'double': '双精度 (double)', 'bool': '布尔 (bool)', 'string': '字符串 (string)' };
             const dt = device.dataType || (type === 'sensor' || type === 'videoData' ? 'float' : 'bool');
             selectCustomDropdown('dmDataType', dt, typeOptions[dt] || '浮点数 (float)', 'dmDataTypeDropdown');
-            
+
             selectIcon(device.icon || (type === 'sensor' ? 'fa-microchip' : type === 'control' ? 'fa-plug' : 'fa-users'));
-            
+
             document.getElementById('dmStep').value = device.step || '1';
-            
+
             if (type === 'sensor' || type === 'videoData') {
                 document.getElementById('dmSensorFields').classList.remove('hidden');
                 document.getElementById('dmUnit').value = device.unit || '';
@@ -752,9 +663,9 @@
             } else {
                 document.getElementById('dmSensorFields').classList.add('hidden');
             }
-            
+
             toggleStepInput();
-            showModal('deviceModal', 'dmBackdrop', 'dmContent');
+            showModal('deviceModal');
         }
 
         function toggleStepInput() {
@@ -762,11 +673,11 @@
             const stepInput = document.getElementById('dmStep');
             if (type === 'int32' || type === 'float' || type === 'double') {
                 stepInput.disabled = false;
-                stepInput.classList.remove('bg-gray-100', 'text-gray-400');
+                stepInput.style.opacity = '';
             } else {
                 stepInput.disabled = true;
                 stepInput.value = '';
-                stepInput.classList.add('bg-gray-100', 'text-gray-400');
+                stepInput.style.opacity = '0.5';
             }
         }
 
@@ -774,7 +685,7 @@
             const type = document.getElementById('dmType').value;
             const originalId = document.getElementById('dmOriginalId').value;
             const id = document.getElementById('dmId').value.trim();
-            
+
             if (!id || !/^[a-zA-Z0-9_]+$/.test(id)) {
                 showToast('内部ID必须为英文字母、数字或下划线');
                 return;
@@ -802,7 +713,7 @@
                 const idx = list.findIndex(d => d.id === originalId);
                 if (idx !== -1) list[idx] = device;
             } else {
-                if (currentModel.sensors.find(d => d.id === id) || 
+                if (currentModel.sensors.find(d => d.id === id) ||
                     currentModel.controls.find(d => d.id === id) ||
                     (currentModel.videoData && currentModel.videoData.find(d => d.id === id))) {
                     showToast('ID已存在，请使用其他ID');
@@ -823,12 +734,12 @@
                 '删除设备',
                 '确定要删除此设备吗？相关的UI卡片和历史数据将不再显示。',
                 '确认删除',
-                'bg-red-500 hover:bg-red-600',
+                'danger',
                 () => {
                     const type = document.getElementById('dmType').value;
                     const id = document.getElementById('dmOriginalId').value;
                     const list = type === 'sensor' ? currentModel.sensors : type === 'control' ? currentModel.controls : (currentModel.videoData || []);
-                    
+
                     const idx = list.findIndex(d => d.id === id);
                     if (idx !== -1) {
                         list.splice(idx, 1);
@@ -842,7 +753,7 @@
             );
         }
 
-        function closeDeviceModal() { hideModal('deviceModal', 'dmBackdrop', 'dmContent'); }
+        function closeDeviceModal() { hideModal('deviceModal'); }
 
         // --- OneNet Modal ---
         function openOneNetConfigModal() {
@@ -852,47 +763,43 @@
                 document.getElementById('configDeviceName').value = userConfig.deviceName || '';
                 document.getElementById('configToken').value = userConfig.token || '';
             }
-            showModal('onenetModal', 'onenetModalBackdrop', 'onenetModalContent');
+            showModal('onenetModal');
         }
 
-        function closeOneNetConfigModal() { hideModal('onenetModal', 'onenetModalBackdrop', 'onenetModalContent'); }
+        function closeOneNetConfigModal() { hideModal('onenetModal'); }
 
         function saveOneNetConfigModal() {
             const productId = document.getElementById('configProductId').value.trim();
             const deviceName = document.getElementById('configDeviceName').value.trim();
             const token = document.getElementById('configToken').value.trim();
-            
+
             if (!productId || !deviceName || !token) { showToast('请填写完整的产品ID、设备名称和Token'); return; }
-            
+
             localStorage.setItem('iot_onenet_config', JSON.stringify({ productId, deviceName, token }));
             // 清除旧的设备缓存和报警，避免串台
             localStorage.removeItem('iot_latest_data');
             localStorage.removeItem('iot_history_data');
             localStorage.removeItem('iot_alerts');
             localStorage.removeItem('iot_alarm_states');
-            
+
             closeOneNetConfigModal();
             showToast('云平台配置已保存，即将重新加载...');
             setTimeout(() => window.location.reload(), 1000);
         }
 
         // --- Utility ---
-        function showModal(modalId, bgId, contentId) {
+        function showModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => {
-                document.getElementById(bgId).classList.remove('opacity-0');
-                document.getElementById(contentId).classList.remove('scale-95', 'opacity-0');
-            }, 10);
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                modal.classList.add('show');
+            }));
         }
 
-        function hideModal(modalId, bgId, contentId) {
-            document.getElementById(bgId).classList.add('opacity-0');
-            document.getElementById(contentId).classList.add('scale-95', 'opacity-0');
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
             setTimeout(() => {
-                const modal = document.getElementById(modalId);
-                modal.classList.remove('flex');
                 modal.classList.add('hidden');
             }, 200);
         }
@@ -900,11 +807,9 @@
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').innerText = msg;
-            toast.classList.remove('-translate-y-10', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
+            toast.classList.add('show');
             setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('-translate-y-10', 'opacity-0');
+                toast.classList.remove('show');
             }, 2000);
         }
 
@@ -913,7 +818,7 @@
                 '清除缓存并重置',
                 '确定要清除所有缓存并恢复默认配置吗？这会删除所有的历史数据、警报记录和自定义设置。',
                 '确认清除',
-                'bg-red-500 hover:bg-red-600',
+                'danger',
                 () => {
                     localStorage.clear();
                     showToast('已重置');
@@ -927,7 +832,7 @@
                 '退出登录',
                 '确定要退出当前账号吗？',
                 '退出登录',
-                'bg-red-500 hover:bg-red-600',
+                'danger',
                 () => {
                     localStorage.removeItem('lastLoginTime');
                     window.location.href = 'login.html';
