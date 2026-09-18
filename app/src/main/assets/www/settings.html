@@ -57,11 +57,11 @@
 
         <!-- Dynamic Sensor & Device Management -->
         <section>
-            <div class="flex justify-between items-center mb-2.5 px-1">
+            <div class="mb-2.5 px-1">
                 <h3 class="list-title flex items-center gap-1.5" style="padding: 0;">
                     <i class="fas fa-microchip" style="font-size: 11px;"></i> 数据模型与阈值管理
                 </h3>
-                <div class="flex gap-2">
+                <div class="flex gap-2 mt-2">
                     <button onclick="openDeviceModal('sensor')" class="btn btn-ghost btn-sm text-accent"><i class="fas fa-plus"></i> 传感器</button>
                     <button onclick="openDeviceModal('control')" class="btn btn-ghost btn-sm text-accent"><i class="fas fa-plus"></i> 控制器</button>
                     <button onclick="openDeviceModal('videoData')" class="btn btn-ghost btn-sm text-accent"><i class="fas fa-video"></i> 视频数据</button>
@@ -220,7 +220,7 @@
                 </button>
             </div>
 
-            <div class="p-5 overflow-y-auto flex-1 flex flex-col gap-4" style="max-height: 60vh;">
+            <div class="modal-scroll p-5 flex flex-col gap-4">
                 <input type="hidden" id="dmType">
                 <input type="hidden" id="dmOriginalId">
 
