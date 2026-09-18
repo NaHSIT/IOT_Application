@@ -76,7 +76,24 @@
         © 2026 分布式机房监控系统
     </div>
 
+    <!-- Toast -->
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 bg-red-500 text-white px-5 py-3 rounded-full shadow-[0_4px_12px_rgba(239,68,68,0.3)] font-bold text-[13px] tracking-wide z-[110] transform -translate-y-10 opacity-0 transition-all duration-300 pointer-events-none flex items-center">
+        <i class="fas fa-exclamation-circle text-white mr-2"></i> <span id="toastMsg">账号或密码错误！</span>
+    </div>
+
     <script>
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]', '-translate-y-10');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-10');
+            }, 2500);
+        }
+
         // 7天免登录检查
         window.addEventListener('DOMContentLoaded', () => {
             const lastLogin = localStorage.getItem('lastLoginTime');
@@ -103,7 +120,7 @@
                 }
                 window.location.href = 'index.html';
             } else {
-                alert('账号或密码错误！');
+                showToast('账号或密码错误！');
             }
         });
     </script>

@@ -112,9 +112,16 @@
 
             alertsList.innerHTML = filteredData.map(alert => {
                 const sensorConfig = currentModel.sensors.find(s => s.id === alert.type) || {};
-                const decimals = typeof getDecimals === 'function' ? getDecimals(sensorConfig.dataType, sensorConfig.step) : 1;
-                let displayVal = parseFloat(alert.currentValue).toFixed(decimals);
-                let displayThresh = parseFloat(alert.threshold).toFixed(decimals);
+                let displayVal, displayThresh;
+                
+                if (sensorConfig.dataType === 'string' || sensorConfig.dataType === 'boolean') {
+                    displayVal = String(alert.currentValue);
+                    displayThresh = String(alert.threshold);
+                } else {
+                    const decimals = typeof getDecimals === 'function' ? getDecimals(sensorConfig.dataType, sensorConfig.step) : 1;
+                    displayVal = parseFloat(alert.currentValue).toFixed(decimals);
+                    displayThresh = parseFloat(alert.threshold).toFixed(decimals);
+                }
                 
                 return `
                 <div class="card p-5 relative overflow-hidden border ${alert.status === 'unread' ? (alert.isCritical ? 'border-red-100/50 shadow-sm' : 'border-blue-100/50 shadow-sm') : 'border-gray-100/80 shadow-sm'}">

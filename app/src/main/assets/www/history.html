@@ -364,12 +364,22 @@
                 
                 const displayTime = fullTimes[i] || labels[i];
                 
-                const isExceed = (value < thMin || value > thMax);
-                const finalColor = isExceed ? 'text-red-500' : 'text-gray-800'; // Default text color for non-exceeding values
-                
                 // Find the original sensor config to get dataType and step
                 const sensorConfig = currentModel.sensors.find(s => s.id === metricKey) || {};
-                const decimals = typeof getDecimals === 'function' ? getDecimals(sensorConfig.dataType, sensorConfig.step) : 1;
+                
+                let displayVal;
+                let isExceed = false;
+                
+                if (sensorConfig.dataType === 'string' || sensorConfig.dataType === 'boolean') {
+                    displayVal = String(value);
+                } else {
+                    const numericVal = Number(value);
+                    isExceed = (numericVal < thMin || numericVal > thMax);
+                    const decimals = typeof getDecimals === 'function' ? getDecimals(sensorConfig.dataType, sensorConfig.step) : 1;
+                    displayVal = numericVal.toFixed(decimals);
+                }
+                
+                const finalColor = isExceed ? 'text-red-500' : 'text-gray-800'; // Default text color for non-exceeding values
                 
                 html += `
                 <div class="px-5 py-3.5 flex justify-between items-center text-[13px] font-bold text-gray-700 bg-white hover:bg-gray-50 transition">
@@ -377,7 +387,7 @@
                         <span class="w-1.5 h-1.5 rounded-full ${isExceed ? 'bg-red-400' : 'bg-gray-300'} mr-2.5"></span>
                         <span class="text-gray-500">${displayTime}</span>
                     </div>
-                    <span class="${finalColor} tracking-wide">${Number(value).toFixed(decimals)} <span class="text-[10px] ${isExceed ? 'text-red-400' : 'text-gray-400'} ml-0.5">${selected.unit}</span></span>
+                    <span class="${finalColor} tracking-wide">${displayVal} <span class="text-[10px] ${isExceed ? 'text-red-400' : 'text-gray-400'} ml-0.5">${selected.unit}</span></span>
                 </div>`;
             }
             dataTableBody.innerHTML = html;

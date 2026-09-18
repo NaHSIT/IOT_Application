@@ -79,19 +79,23 @@
 
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <a href="index.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-blue-500">
+        <a href="index.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-blue-500">
             <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">首页</span>
         </a>
-        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">监测</span>
         </a>
-        <a href="control.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="video.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-video text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">视频</span>
+        </a>
+        <a href="control.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">控制</span>
         </a>
-        <a href="settings.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="settings.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
             <i class="far fa-user text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">我的</span>
         </a>
@@ -247,13 +251,23 @@
                         alarmStates[stateKey] = true;
                         localStorage.setItem('iot_alarm_states', JSON.stringify(alarmStates));
 
+                        // Find the unit from either sensors or videoData
+                        let unit = '';
+                        const sensorItem = currentModel.sensors.find(s => s.id === type);
+                        if (sensorItem) {
+                            unit = sensorItem.unit || '';
+                        } else if (currentModel.videoData) {
+                            const videoItem = currentModel.videoData.find(v => v.id === type);
+                            if (videoItem) unit = videoItem.unit || '';
+                        }
+
                         alerts.unshift({
                             id: Date.now(),
                             title: title,
                             type: type,
                             currentValue: val,
                             threshold: thresh,
-                            unit: currentModel.sensors.find(s => s.id === type)?.unit || '',
+                            unit: unit,
                             time: `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`,
                             timestamp: now.getTime(),
                             status: 'unread',
@@ -272,21 +286,29 @@
 
             currentModel.sensors.forEach(s => {
                 if (data[s.id] !== undefined) {
-                    const decimals = typeof getDecimals === 'function' ? getDecimals(s.dataType, s.step) : 1;
-                    const val = Number(data[s.id]).toFixed(decimals);
+                    let displayVal;
+                    let isAlert = false;
+                    let numericVal = null;
+                    
+                    if (s.dataType === 'string' || s.dataType === 'boolean') {
+                        displayVal = String(data[s.id]);
+                    } else {
+                        const decimals = typeof getDecimals === 'function' ? getDecimals(s.dataType, s.step) : 1;
+                        displayVal = Number(data[s.id]).toFixed(decimals);
+                        numericVal = Number(displayVal);
+                    }
+
                     const valEl = document.getElementById(`sensor-val-${s.id}`);
-                    if(valEl) valEl.innerText = val;
+                    if(valEl) valEl.innerText = displayVal;
                     
                     const statusEl = document.getElementById(`sensor-status-${s.id}`);
                     if (statusEl) {
-                        let isAlert = false;
-                        const numericVal = Number(val);
-                        if (numericVal > s.max) {
+                        if (numericVal !== null && numericVal > s.max) {
                             isAlert = true;
                             statusEl.innerText = '过高';
                             statusEl.className = 'text-[11px] font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md tracking-wide border border-red-100/50 whitespace-nowrap flex-shrink-0';
                             checkAlert(s.id, numericVal, s.max, `${s.name}过高报警`, true);
-                        } else if (numericVal < s.min) {
+                        } else if (numericVal !== null && numericVal < s.min) {
                             isAlert = true;
                             statusEl.innerText = '过低';
                             statusEl.className = 'text-[11px] font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md tracking-wide border border-red-100/50 whitespace-nowrap flex-shrink-0';
@@ -316,6 +338,24 @@
                     }
                 }
             });
+
+            // Check alerts for videoData
+            if (currentModel.videoData) {
+                currentModel.videoData.forEach(v => {
+                    if (data[v.id] !== undefined) {
+                        let numericVal = null;
+                        if (v.dataType !== 'string' && v.dataType !== 'boolean') {
+                            numericVal = Number(data[v.id]);
+                            
+                            if (v.max !== undefined && numericVal > v.max) {
+                                checkAlert(v.id, numericVal, v.max, `${v.name}过高报警`, true);
+                            } else if (v.min !== undefined && numericVal < v.min) {
+                                checkAlert(v.id, numericVal, v.min, `${v.name}过低报警`, false);
+                            }
+                        }
+                    }
+                });
+            }
 
             const alertBanner = document.getElementById('alertBanner');
             if (hasAlert) {
