@@ -101,9 +101,9 @@ IOT/
 
 ## ⚠️ 二次开发注意事项
 
-- **保留原生交互桥梁**：如果您要修改 MainActivity.kt，请务必保留 ddJavascriptInterface(WebAppInterface(this), "AndroidApp") 以及 WebChromeClient 的设置。这是保证 Web 页面能调用原生系统分享面板（导出 CSV）的核心代码。
+- **保留原生交互桥梁**：如果您要修改 MainActivity.kt，请务必保留 addJavascriptInterface(WebAppInterface(this), "AndroidApp") 以及 WebChromeClient 的设置。这是保证 Web 页面能调用原生系统分享面板（导出 CSV）的核心代码。
 - **清除缓存**：如果您更换了 OneNet 设备，或者页面数据发生严重错乱，请在"我的"页面最下方点击 **"恢复默认/清除缓存"** 重置 localStorage。
-- **HTTP 明文流量**：本项目已在 AndroidManifest.xml 中开启 ndroid:usesCleartextTraffic="true"，用于支持局域网 HTTP 视频流访问。生产环境建议配置网络安全策略文件精确控制允许的域名范围。
+- **HTTP 明文流量**：本项目已在 AndroidManifest.xml 中开启 android:usesCleartextTraffic="true"，用于支持局域网 HTTP 视频流访问。生产环境建议配置网络安全策略文件精确控制允许的域名范围。
 
 ---
 
