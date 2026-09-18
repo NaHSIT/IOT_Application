@@ -16,7 +16,8 @@ const DEFAULT_DATA_MODEL = {
         { id: 'led2', name: '报警灯', icon: 'fa-lightbulb', color: 'red', cloudKey: 'LED2', dataType: 'bool', step: 1 },
         { id: 'led1', name: '照明灯', icon: 'fa-lightbulb', color: 'yellow', cloudKey: 'LED1', dataType: 'bool', step: 1 },
         { id: 'buzzer', name: '蜂鸣器', icon: 'fa-bullhorn', color: 'orange', cloudKey: 'Buzzer', dataType: 'bool', step: 1 }
-    ]
+    ],
+    videoData: []
 };
 
 // Common FontAwesome icons for the user to select
@@ -26,7 +27,8 @@ const COMMON_ICONS = [
     'fa-bell', 'fa-bullhorn', 'fa-plug', 'fa-power-off', 'fa-microchip', 
     'fa-server', 'fa-battery-full', 'fa-smog', 'fa-cloud', 'fa-sun',
     'fa-snowflake', 'fa-lock', 'fa-unlock', 'fa-video', 'fa-camera',
-    'fa-door-open', 'fa-door-closed', 'fa-car-battery', 'fa-satellite-dish'
+    'fa-door-open', 'fa-door-closed', 'fa-car-battery', 'fa-satellite-dish',
+    'fa-users', 'fa-user', 'fa-eye', 'fa-car', 'fa-truck'
 ];
 
 function getDataModel() {
