@@ -69,6 +69,7 @@
                 <div class="flex space-x-2">
                     <button onclick="openDeviceModal('sensor')" class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md active:bg-blue-100 transition"><i class="fas fa-plus"></i> 传感器</button>
                     <button onclick="openDeviceModal('control')" class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md active:bg-emerald-100 transition"><i class="fas fa-plus"></i> 控制器</button>
+                    <button onclick="openDeviceModal('videoData')" class="text-[10px] font-bold text-purple-500 bg-purple-50 px-2 py-1 rounded-md active:bg-purple-100 transition"><i class="fas fa-video"></i> 视频数据</button>
                 </div>
             </div>
             <div class="card overflow-hidden border border-gray-50" id="deviceListContainer">
@@ -116,6 +117,23 @@
                         <div class="flex items-center space-x-2">
                             <input type="text" id="dashboardTitleInput" placeholder="OneNet物联网后台" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-bold focus:outline-none focus:border-blue-500">
                             <button onclick="saveDashboardTitle()" class="px-4 py-2 text-[12px] font-bold text-white bg-blue-500 rounded-lg active:bg-blue-600 transition shadow-sm">保存</button>
+                        </div>
+                    </div>
+                    
+                    <div class="px-5 py-4.5">
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5">视频流监控地址</label>
+                        <p class="text-[10px] text-gray-400 mb-1.5">填写您部署的视频流地址，例如：http://192.168.1.100:8080/video</p>
+                        <div class="flex items-center space-x-2">
+                            <input type="url" id="videoUrlInput" placeholder="http://192.168.1.100:8080/video" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[12px] font-mono focus:outline-none focus:border-blue-500">
+                            <button onclick="saveVideoUrl()" class="px-4 py-2 text-[12px] font-bold text-white bg-blue-500 rounded-lg active:bg-blue-600 transition shadow-sm">保存</button>
+                        </div>
+                    </div>
+                    <div class="px-5 py-4.5">
+                        <label class="block text-[11px] font-bold text-gray-500 mb-1.5">视频页面标题</label>
+                        <p class="text-[10px] text-gray-400 mb-1.5">自定义视频监控页面的顶部标题展示内容。</p>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="videoTitleInput" placeholder="实时监控" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] font-bold focus:outline-none focus:border-blue-500">
+                            <button onclick="saveVideoTitle()" class="px-4 py-2 text-[12px] font-bold text-white bg-blue-500 rounded-lg active:bg-blue-600 transition shadow-sm">保存</button>
                         </div>
                     </div>
                     <div class="px-5 py-4.5 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="openOneNetConfigModal()">
@@ -206,19 +224,23 @@
 
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around pt-3 pb-safe z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <a href="index.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="index.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-home text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">首页</span>
         </a>
-        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="monitoring.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-chart-bar text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">监测</span>
         </a>
-        <a href="control.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-gray-400 hover:text-gray-600 transition">
+        <a href="video.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
+            <i class="fas fa-video text-[1.25rem] mb-0.5"></i>
+            <span class="text-[10px] font-bold tracking-wide">视频</span>
+        </a>
+        <a href="control.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-gray-400 hover:text-gray-600 transition">
             <i class="fas fa-sliders-h text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">控制</span>
         </a>
-        <a href="settings.html" class="flex flex-col items-center space-y-1 w-16 mb-1 text-blue-500 relative">
+        <a href="settings.html" class="flex flex-col items-center space-y-1 w-[20%] mb-1 text-blue-500 relative">
             <i class="fas fa-user text-[1.25rem] mb-0.5"></i>
             <span class="text-[10px] font-bold tracking-wide">我的</span>
         </a>
@@ -267,30 +289,48 @@
                             <!-- JS Dynamically injected -->
                         </div>
                     </div>
-                    <div class="col-span-2">
+                    <div class="col-span-2 relative">
                         <label class="block text-[10px] font-bold text-gray-500 mb-1">主题颜色</label>
-                        <select id="dmColor" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500">
-                            <option value="blue">蓝色 (Blue)</option>
-                            <option value="orange">橙色 (Orange)</option>
-                            <option value="red">红色 (Red)</option>
-                            <option value="green">绿色 (Green)</option>
-                            <option value="slate">灰色 (Slate)</option>
-                            <option value="cyan">青色 (Cyan)</option>
-                            <option value="yellow">黄色 (Yellow)</option>
-                        </select>
+                        <div class="relative" id="dmColorSelectWrap">
+                            <input type="hidden" id="dmColor" value="blue">
+                            <div class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-gray-800 text-[13px] cursor-pointer flex items-center justify-between" onclick="toggleCustomDropdown('dmColorDropdown')">
+                                <span id="dmColorText">蓝色 (Blue)</span>
+                                <i class="fas fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" id="dmColorIcon"></i>
+                            </div>
+                            <div id="dmColorDropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] hidden overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
+                                <div class="max-h-48 overflow-y-auto custom-scrollbar">
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'blue', '蓝色 (Blue)', 'dmColorDropdown')">蓝色 (Blue)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'orange', '橙色 (Orange)', 'dmColorDropdown')">橙色 (Orange)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'red', '红色 (Red)', 'dmColorDropdown')">红色 (Red)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'green', '绿色 (Green)', 'dmColorDropdown')">绿色 (Green)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'slate', '灰色 (Slate)', 'dmColorDropdown')">灰色 (Slate)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'cyan', '青色 (Cyan)', 'dmColorDropdown')">青色 (Cyan)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmColor', 'yellow', '黄色 (Yellow)', 'dmColorDropdown')">黄色 (Yellow)</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3 mt-4">
-                    <div>
+                    <div class="relative">
                         <label class="block text-[10px] font-bold text-gray-500 mb-1">数据类型</label>
-                        <select id="dmDataType" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-[13px] focus:outline-none focus:border-blue-500" onchange="toggleStepInput()">
-                            <option value="int32">整数 (int32)</option>
-                            <option value="float">浮点数 (float)</option>
-                            <option value="double">双精度 (double)</option>
-                            <option value="bool">布尔 (bool)</option>
-                            <option value="string">字符串 (string)</option>
-                        </select>
+                        <div class="relative" id="dmDataTypeSelectWrap">
+                            <input type="hidden" id="dmDataType" value="int32">
+                            <div class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-8 py-2 text-gray-800 text-[13px] cursor-pointer flex items-center justify-between" onclick="toggleCustomDropdown('dmDataTypeDropdown')">
+                                <span id="dmDataTypeText">整数 (int32)</span>
+                                <i class="fas fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" id="dmDataTypeIcon"></i>
+                            </div>
+                            <div id="dmDataTypeDropdown" class="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] hidden overflow-hidden origin-top scale-95 opacity-0 transition-all duration-200">
+                                <div class="max-h-48 overflow-y-auto custom-scrollbar">
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'int32', '整数 (int32)', 'dmDataTypeDropdown'); toggleStepInput();">整数 (int32)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'float', '浮点数 (float)', 'dmDataTypeDropdown'); toggleStepInput();">浮点数 (float)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'double', '双精度 (double)', 'dmDataTypeDropdown'); toggleStepInput();">双精度 (double)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'bool', '布尔 (bool)', 'dmDataTypeDropdown'); toggleStepInput();">布尔 (bool)</div>
+                                    <div class="px-4 py-2.5 text-[13px] text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition font-medium" onclick="selectCustomDropdown('dmDataType', 'string', '字符串 (string)', 'dmDataTypeDropdown'); toggleStepInput();">字符串 (string)</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 mb-1">步长</label>
@@ -377,6 +417,55 @@
         
         let confirmAction = null;
 
+        // Custom Dropdown Logic
+        function toggleCustomDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            const icon = document.getElementById(dropdownId.replace('Dropdown', 'Icon'));
+            const isHidden = dropdown.classList.contains('hidden');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('[id$="Dropdown"]').forEach(d => {
+                if(d.id !== dropdownId) {
+                    d.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => d.classList.add('hidden'), 200);
+                    const otherIcon = document.getElementById(d.id.replace('Dropdown', 'Icon'));
+                    if(otherIcon) otherIcon.classList.remove('rotate-180');
+                }
+            });
+
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                setTimeout(() => {
+                    dropdown.classList.remove('opacity-0', 'scale-95');
+                    icon.classList.add('rotate-180');
+                }, 10);
+            } else {
+                dropdown.classList.add('opacity-0', 'scale-95');
+                icon.classList.remove('rotate-180');
+                setTimeout(() => dropdown.classList.add('hidden'), 200);
+            }
+        }
+
+        function selectCustomDropdown(inputId, value, text, dropdownId) {
+            document.getElementById(inputId).value = value;
+            document.getElementById(inputId + 'Text').innerText = text;
+            toggleCustomDropdown(dropdownId);
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#dmColorSelectWrap') && !e.target.closest('#dmDataTypeSelectWrap')) {
+                document.querySelectorAll('[id$="Dropdown"]').forEach(d => {
+                    if (!d.classList.contains('hidden')) {
+                        d.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => d.classList.add('hidden'), 200);
+                        const icon = document.getElementById(d.id.replace('Dropdown', 'Icon'));
+                        if(icon) icon.classList.remove('rotate-180');
+                    }
+                });
+            }
+        });
+
         function showConfirm(title, message, btnText, btnColorClass, action) {
             document.getElementById('confirmTitle').innerText = title;
             document.getElementById('confirmMessage').innerText = message;
@@ -425,6 +514,8 @@
             updateToggleUI(soundToggle);
             
             document.getElementById('dashboardTitleInput').value = localStorage.getItem('iot_dashboard_title') || 'OneNet物联网后台';
+            document.getElementById('videoUrlInput').value = config.videoUrl || '';
+            document.getElementById('videoTitleInput').value = localStorage.getItem('iot_video_title') || '实时监控';
             
             const onenetConfig = JSON.parse(localStorage.getItem('iot_onenet_config') || 'null');
             const statusEl = document.getElementById('onenetStatusText');
@@ -454,6 +545,28 @@
                 localStorage.removeItem('iot_dashboard_title');
                 showToast('已恢复默认标题');
                 input.value = 'OneNet物联网后台';
+            }
+        }
+
+        function saveVideoUrl() {
+            const input = document.getElementById('videoUrlInput');
+            const url = input.value.trim();
+            let config = JSON.parse(localStorage.getItem('iot_config') || '{}');
+            config.videoUrl = url;
+            localStorage.setItem('iot_config', JSON.stringify(config));
+            showToast('已保存视频流地址');
+        }
+
+        function saveVideoTitle() {
+            const input = document.getElementById('videoTitleInput');
+            const newTitle = input.value.trim();
+            if (newTitle) {
+                localStorage.setItem('iot_video_title', newTitle);
+                showToast('视频标题已保存');
+            } else {
+                localStorage.removeItem('iot_video_title');
+                showToast('已恢复默认标题');
+                input.value = '实时监控';
             }
         }
 
@@ -505,48 +618,75 @@
             const container = document.getElementById('deviceList');
             container.innerHTML = '';
             
-            currentModel.sensors.forEach(sensor => {
-                const colors = COLOR_CLASSES[sensor.color] || COLOR_CLASSES['slate'];
+            if (currentModel.sensors.length === 0 && currentModel.controls.length === 0 && (!currentModel.videoData || currentModel.videoData.length === 0)) {
+                container.innerHTML = `
+                    <div class="px-5 py-8 text-center">
+                        <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-inbox text-gray-300 text-xl"></i>
+                        </div>
+                        <p class="text-[12px] font-bold text-gray-400">暂无数据模型</p>
+                        <p class="text-[10px] text-gray-400 mt-1">点击右上角添加设备或附加数据</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const appendItem = (item, type) => {
+                let badgeClass, badgeText, typeIcon, borderClass;
+                if (type === 'sensor') {
+                    badgeClass = 'bg-blue-50 text-blue-500 border-blue-100/50';
+                    badgeText = '传感器';
+                    typeIcon = 'fa-satellite-dish';
+                    borderClass = 'border-l-4 border-l-blue-400';
+                } else if (type === 'control') {
+                    badgeClass = 'bg-emerald-50 text-emerald-500 border-emerald-100/50';
+                    badgeText = '控制器';
+                    typeIcon = 'fa-sliders-h';
+                    borderClass = 'border-l-4 border-l-emerald-400';
+                } else if (type === 'videoData') {
+                    badgeClass = 'bg-purple-50 text-purple-500 border-purple-100/50';
+                    badgeText = '视频数据';
+                    typeIcon = 'fa-video';
+                    borderClass = 'border-l-4 border-l-purple-400';
+                }
+
+                const colors = COLOR_CLASSES[item.color] || COLOR_CLASSES['slate'];
+                
                 container.innerHTML += `
-                    <div class="px-5 py-4 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="editDevice('sensor', '${sensor.id}')">
+                    <div class="px-5 py-4 flex items-center justify-between active:bg-gray-50 transition cursor-pointer ${borderClass}" onclick="editDevice('${type}', '${item.id}')">
                         <div class="flex items-center">
-                            <div class="w-9 h-9 rounded-xl ${colors.bg} flex items-center justify-center mr-3.5">
-                                <i class="fas ${sensor.icon} ${colors.text} text-[15px]"></i>
+                            <div class="w-9 h-9 rounded-xl ${colors.bg} flex items-center justify-center mr-3.5 shadow-sm border ${colors.border}">
+                                <i class="fas ${item.icon} ${colors.text} text-[15px]"></i>
                             </div>
                             <div>
-                                <span class="block text-[15px] font-bold text-gray-800 tracking-wide">${sensor.name} <span class="text-[10px] text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded ml-1 border border-blue-100">传感器</span></span>
-                                <span class="block text-[11px] text-gray-400 font-mono mt-0.5">${sensor.cloudKey} | ${sensor.min}~${sensor.max}${sensor.unit}</span>
+                                <div class="flex items-center space-x-2">
+                                    <h4 class="text-[14px] font-bold text-gray-800 tracking-wide">${item.name}</h4>
+                                    <span class="${badgeClass} text-[9px] font-bold px-1.5 py-0.5 rounded border flex items-center"><i class="fas ${typeIcon} mr-1 text-[8px]"></i>${badgeText}</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1 font-mono tracking-wider flex items-center">
+                                    <i class="fas fa-cloud text-gray-300 mr-1 text-[9px]"></i> ${item.cloudKey}
+                                    <span class="mx-1.5 text-gray-200">|</span>
+                                    <i class="fas fa-microchip text-gray-300 mr-1 text-[9px]"></i> ${item.id}
+                                </p>
                             </div>
                         </div>
                         <i class="fas fa-edit text-gray-300 text-[12px]"></i>
                     </div>
                 `;
-            });
-            
-            currentModel.controls.forEach(control => {
-                const colors = COLOR_CLASSES[control.color] || COLOR_CLASSES['slate'];
-                container.innerHTML += `
-                    <div class="px-5 py-4 flex items-center justify-between active:bg-gray-50 transition cursor-pointer" onclick="editDevice('control', '${control.id}')">
-                        <div class="flex items-center">
-                            <div class="w-9 h-9 rounded-xl ${colors.bg} flex items-center justify-center mr-3.5">
-                                <i class="fas ${control.icon} ${colors.text} text-[15px]"></i>
-                            </div>
-                            <div>
-                                <span class="block text-[15px] font-bold text-gray-800 tracking-wide">${control.name} <span class="text-[10px] text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded ml-1 border border-emerald-100">控制器</span></span>
-                                <span class="block text-[11px] text-gray-400 font-mono mt-0.5">${control.cloudKey}</span>
-                            </div>
-                        </div>
-                        <i class="fas fa-edit text-gray-300 text-[12px]"></i>
-                    </div>
-                `;
-            });
+            };
+
+            currentModel.sensors.forEach(s => appendItem(s, 'sensor'));
+            currentModel.controls.forEach(c => appendItem(c, 'control'));
+            if (currentModel.videoData) {
+                currentModel.videoData.forEach(v => appendItem(v, 'videoData'));
+            }
         }
 
         // --- Device Modal ---
         function openDeviceModal(type) {
             document.getElementById('dmType').value = type;
             document.getElementById('dmOriginalId').value = '';
-            document.getElementById('dmTitle').innerText = type === 'sensor' ? '添加传感器' : '添加控制器';
+            document.getElementById('dmTitle').innerText = type === 'sensor' ? '添加传感器' : type === 'control' ? '添加控制器' : '添加视频附加数据';
             document.getElementById('dmDeleteBtn').classList.add('hidden');
             
             // Reset fields
@@ -554,14 +694,16 @@
             document.getElementById('dmId').disabled = false;
             document.getElementById('dmName').value = '';
             document.getElementById('dmCloudKey').value = '';
-            document.getElementById('dmColor').value = 'blue';
             
-            selectIcon(type === 'sensor' ? 'fa-microchip' : 'fa-plug');
+            // Reset custom dropdowns
+            selectCustomDropdown('dmColor', 'blue', '蓝色 (Blue)', 'dmColorDropdown');
+            selectCustomDropdown('dmDataType', type === 'sensor' || type === 'videoData' ? 'float' : 'bool', type === 'sensor' || type === 'videoData' ? '浮点数 (float)' : '布尔 (bool)', 'dmDataTypeDropdown');
             
-            document.getElementById('dmDataType').value = type === 'sensor' ? 'float' : 'bool';
+            selectIcon(type === 'sensor' ? 'fa-microchip' : type === 'control' ? 'fa-plug' : 'fa-users');
+            
             document.getElementById('dmStep').value = '1';
             
-            if (type === 'sensor') {
+            if (type === 'sensor' || type === 'videoData') {
                 document.getElementById('dmSensorFields').classList.remove('hidden');
                 document.getElementById('dmUnit').value = '';
                 document.getElementById('dmMin').value = '0';
@@ -575,7 +717,7 @@
         }
 
         function editDevice(type, id) {
-            const list = type === 'sensor' ? currentModel.sensors : currentModel.controls;
+            const list = type === 'sensor' ? currentModel.sensors : type === 'control' ? currentModel.controls : (currentModel.videoData || []);
             const device = list.find(d => d.id === id);
             if (!device) return;
 
@@ -589,18 +731,24 @@
             document.getElementById('dmName').value = device.name;
             document.getElementById('dmCloudKey').value = device.cloudKey;
             document.getElementById('dmIcon').value = device.icon;
-            document.getElementById('dmColor').value = device.color || 'blue';
             
-            selectIcon(device.icon || (type === 'sensor' ? 'fa-microchip' : 'fa-plug'));
+            // Set custom dropdowns
+            const colorOptions = { 'blue': '蓝色 (Blue)', 'orange': '橙色 (Orange)', 'red': '红色 (Red)', 'green': '绿色 (Green)', 'slate': '灰色 (Slate)', 'cyan': '青色 (Cyan)', 'yellow': '黄色 (Yellow)' };
+            selectCustomDropdown('dmColor', device.color || 'blue', colorOptions[device.color || 'blue'] || '蓝色 (Blue)', 'dmColorDropdown');
             
-            document.getElementById('dmDataType').value = device.dataType || (type === 'sensor' ? 'float' : 'bool');
+            const typeOptions = { 'int32': '整数 (int32)', 'float': '浮点数 (float)', 'double': '双精度 (double)', 'bool': '布尔 (bool)', 'string': '字符串 (string)' };
+            const dt = device.dataType || (type === 'sensor' || type === 'videoData' ? 'float' : 'bool');
+            selectCustomDropdown('dmDataType', dt, typeOptions[dt] || '浮点数 (float)', 'dmDataTypeDropdown');
+            
+            selectIcon(device.icon || (type === 'sensor' ? 'fa-microchip' : type === 'control' ? 'fa-plug' : 'fa-users'));
+            
             document.getElementById('dmStep').value = device.step || '1';
             
-            if (type === 'sensor') {
+            if (type === 'sensor' || type === 'videoData') {
                 document.getElementById('dmSensorFields').classList.remove('hidden');
-                document.getElementById('dmUnit').value = device.unit;
-                document.getElementById('dmMin').value = device.min;
-                document.getElementById('dmMax').value = device.max;
+                document.getElementById('dmUnit').value = device.unit || '';
+                document.getElementById('dmMin').value = device.min !== undefined ? device.min : 0;
+                document.getElementById('dmMax').value = device.max !== undefined ? device.max : 100;
             } else {
                 document.getElementById('dmSensorFields').classList.add('hidden');
             }
@@ -642,19 +790,21 @@
                 step: parseFloat(document.getElementById('dmStep').value) || 1
             };
 
-            if (type === 'sensor') {
+            if (type === 'sensor' || type === 'videoData') {
                 device.unit = document.getElementById('dmUnit').value.trim();
                 device.min = parseFloat(document.getElementById('dmMin').value) || 0;
                 device.max = parseFloat(document.getElementById('dmMax').value) || 100;
             }
 
-            const list = type === 'sensor' ? currentModel.sensors : currentModel.controls;
+            const list = type === 'sensor' ? currentModel.sensors : type === 'control' ? currentModel.controls : (currentModel.videoData = currentModel.videoData || []);
 
             if (originalId) {
                 const idx = list.findIndex(d => d.id === originalId);
                 if (idx !== -1) list[idx] = device;
             } else {
-                if (currentModel.sensors.find(d => d.id === id) || currentModel.controls.find(d => d.id === id)) {
+                if (currentModel.sensors.find(d => d.id === id) || 
+                    currentModel.controls.find(d => d.id === id) ||
+                    (currentModel.videoData && currentModel.videoData.find(d => d.id === id))) {
                     alert('ID已存在，请使用其他ID');
                     return;
                 }
@@ -677,7 +827,7 @@
                 () => {
                     const type = document.getElementById('dmType').value;
                     const id = document.getElementById('dmOriginalId').value;
-                    const list = type === 'sensor' ? currentModel.sensors : currentModel.controls;
+                    const list = type === 'sensor' ? currentModel.sensors : type === 'control' ? currentModel.controls : (currentModel.videoData || []);
                     
                     const idx = list.findIndex(d => d.id === id);
                     if (idx !== -1) {
@@ -779,6 +929,7 @@
                 '退出登录',
                 'bg-red-500 hover:bg-red-600',
                 () => {
+                    localStorage.removeItem('lastLoginTime');
                     window.location.href = 'login.html';
                 }
             );
